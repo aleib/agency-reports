@@ -9,6 +9,7 @@ import { authRoutes } from "./routes/auth.routes.js";
 import { clientRoutes } from "./routes/clients.routes.js";
 import { oauthRoutes } from "./routes/oauth.routes.js";
 import { snapshotRoutes } from "./routes/snapshots.routes.js";
+import { reportRoutes } from "./routes/reports.routes.js";
 import { AppError } from "./lib/errors.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -22,12 +23,12 @@ const server = Fastify({
     transport:
       process.env.NODE_ENV !== "production"
         ? {
-            target: "pino-pretty",
-            options: {
-              translateTime: "HH:MM:ss Z",
-              ignore: "pid,hostname",
-            },
-          }
+          target: "pino-pretty",
+          options: {
+            translateTime: "HH:MM:ss Z",
+            ignore: "pid,hostname",
+          },
+        }
         : undefined,
   },
 });
@@ -73,6 +74,7 @@ await server.register(authRoutes);
 await server.register(clientRoutes);
 await server.register(oauthRoutes);
 await server.register(snapshotRoutes);
+await server.register(reportRoutes);
 
 // Health check endpoint
 server.get("/health", async () => {

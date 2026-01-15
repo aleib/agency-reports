@@ -142,37 +142,41 @@ Build a lightweight monthly reporting platform for a marketing agency. MVP gener
 
 ---
 
-## Phase 4: PDF Report Generation
+## Phase 4: PDF Report Generation ✅ COMPLETE
 
 ### 4.1 Report Template
 
-- [ ] Create HTML/CSS report template (Handlebars)
-- [ ] Sections:
+- [x] Create HTML/CSS report template (Handlebars)
+- [x] Sections:
   - Header (client name, report period)
   - Executive summary (top-line metrics with % changes)
   - Traffic sources (table + simple chart)
   - Key events/conversions table
-- [ ] Server-render charts as SVG using `chartjs-node-canvas`
+- [x] Server-render charts as PNG using `chartjs-node-canvas`
 
 ### 4.2 Renderer Service
 
-- [ ] Separate Node.js service with Puppeteer
-- [ ] Endpoint: `POST /render` accepts HTML, returns PDF buffer
-- [ ] Configure for print-optimized output (A4, margins)
-- [ ] Local dev: runs as separate process or Docker container
+- [x] Separate Node.js service with Puppeteer
+- [x] Endpoint: `POST /render` accepts HTML, returns PDF buffer
+- [x] Endpoint: `POST /render/report` accepts snapshot data, returns PDF
+- [x] Endpoint: `POST /render/preview` accepts snapshot data, returns HTML
+- [x] Configure for print-optimized output (A4, margins)
+- [x] Local dev: runs as separate process
 
 ### 4.3 PDF Generation Flow
 
-- [ ] API endpoint: `GET /clients/:id/preview?month=YYYY-MM` (HTML preview)
-- [ ] API endpoint: `POST /clients/:id/reports` (generate PDF)
-- [ ] Store generated PDF alongside snapshot JSON
-- [ ] Endpoint: `GET /snapshots/:id/pdf` (download PDF)
+- [x] API endpoint: `GET /clients/:id/preview?month=YYYY-MM` (HTML preview)
+- [x] API endpoint: `POST /clients/:id/reports` (generate PDF)
+- [x] Store generated PDF alongside snapshot JSON
+- [x] Endpoint: `GET /snapshots/:id/pdf` (download PDF)
 
-**Files to create:**
+**Files created:**
 
 - `packages/renderer/src/templates/report.hbs`
+- `packages/renderer/src/templates/styles.css`
 - `packages/renderer/src/charts.ts`
 - `packages/api/src/services/render.service.ts`
+- `packages/api/src/routes/reports.routes.ts`
 
 ---
 

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{clientName}} - {{periodLabel}} Performance Report</title>
+  <style>
+    {{{styles}}}
+  </style>
+</head>
+<body>
+  <div class="report">
+    <!-- Header -->
+    <header class="report-header">
+      <h1>{{clientName}}</h1>
+      <div class="period">{{periodLabel}} Performance Report</div>
+      <div class="generated-at">Generated on {{generatedAtFormatted}}</div>
+    </header>
+
+    {{#if ga4}}
+    <!-- Executive Summary -->
+    <section class="section">
+      <h2 class="section-title">Executive Summary</h2>
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="label">Sessions</div>
+          <div class="value">{{formatNumber ga4.current.sessions}}</div>
+          <div class="change {{changeClass ga4.changes.sessions}}">
+            {{formatChange ga4.changes.sessions}}
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="label">Users</div>
+          <div class="value">{{formatNumber ga4.current.users}}</div>
+          <div class="change {{changeClass ga4.changes.users}}">
+            {{formatChange ga4.changes.users}}
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="label">Pageviews</div>
+          <div class="value">{{formatNumber ga4.current.pageviews}}</div>
+          <div class="change {{changeClass ga4.changes.pageviews}}">
+            {{formatChange ga4.changes.pageviews}}
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="label">New Users</div>
+          <div class="value">{{formatNumber ga4.current.newUsers}}</div>
+          <div class="change {{changeClass ga4.changes.newUsers}}">
+            {{formatChange ga4.changes.newUsers}}
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="label">Avg. Session Duration</div>
+          <div class="value">{{formatDuration ga4.current.avgSessionDuration}}</div>
+          <div class="change {{changeClass ga4.changes.avgSessionDuration}}">
+            {{formatChange ga4.changes.avgSessionDuration}}
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="label">Bounce Rate</div>
+          <div class="value">{{formatPercent ga4.current.bounceRate}}</div>
+          <div class="change {{changeClass ga4.changes.bounceRate true}}">
+            {{formatChange ga4.changes.bounceRate}}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Traffic Sources -->
+    <section class="section">
+      <h2 class="section-title">Traffic Sources</h2>
+      {{#if ga4.current.channels.length}}
+      <div class="traffic-sources-content">
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Channel</th>
+                <th class="number">Sessions</th>
+                <th class="number">Users</th>
+                <th class="percentage">Share</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each ga4.current.channels}}
+              <tr>
+                <td>{{name}}</td>
+                <td class="number">{{formatNumber sessions}}</td>
+                <td class="number">{{formatNumber users}}</td>
+                <td class="percentage">{{formatPercent percentage}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
+        {{#if channelsPieChart}}
+        <div class="chart-container">
+          <img src="{{channelsPieChart}}" alt="Traffic Sources Chart" />
+        </div>
+        {{/if}}
+      </div>
+      {{else}}
+      <div class="no-data">No traffic source data available for this period.</div>
+      {{/if}}
+    </section>
+
+    <!-- Key Events / Conversions -->
+    {{#if ga4.current.keyEvents.length}}
+    <section class="section">
+      <h2 class="section-title">Key Events (Conversions)</h2>
+      <table class="data-table key-events-table">
+        <thead>
+          <tr>
+            <th>Event Name</th>
+            <th class="number">Count</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each ga4.current.keyEvents}}
+          <tr>
+            <td class="event-name">{{name}}</td>
+            <td class="event-count number">{{formatNumber count}}</td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </section>
+    {{/if}}
+
+    <!-- Period Comparison Chart -->
+    {{#if comparisonChart}}
+    <section class="section comparison-section">
+      <h2 class="section-title">Period Comparison</h2>
+      <div class="comparison-chart">
+        <img src="{{comparisonChart}}" alt="Period Comparison Chart" />
+      </div>
+    </section>
+    {{/if}}
+
+    {{else}}
+    <!-- No GA4 Data -->
+    <section class="section">
+      <div class="no-data">
+        <p>No Google Analytics data available for this report.</p>
+        <p>Please connect a Google Analytics property to this client to generate metrics.</p>
+      </div>
+    </section>
+    {{/if}}
+
+    <!-- Footer -->
+    <footer class="report-footer">
+      <p>Report generated by Agency Reports Platform</p>
+      <p>Data period: {{periodStart}} to {{periodEnd}}</p>
+    </footer>
+  </div>
+</body>
+</html>

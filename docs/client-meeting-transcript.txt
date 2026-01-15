@@ -1,0 +1,433 @@
+
+I paid a lot more for this one now, like because they based it on per client.
+So every client is like eighteen dollars more.
+So every even though I get more clients, it just keeps going up.
+It's like, I was paid ten thousand a month for this reporting.
+But it saves you so much time.
+So I used to probably spend my first week of the month
+just putting data in Excel sheets.
+And now I can pump out and send out those ports to people like within
+the second day of the month.
+So it just like opens up my time.
+It's actually worth the ten thousand and kind of for me.
+But I was like, if I could, if I if I was like a no-braider,
+I would build this and pay all the pay all the usage fees, but not.
+Because then, you know, for me.
+OK, so let's go through like what do you how do you use this?
+How do you use it?
+Like, so I get like a report per client.
+Yeah. So basically, like most clients are very, are very similar.
+I haven't actually built a template report.
+So it just looks like this.
+I get a new client. I run Google ads for them.
+I pretty much import my template now that I bought.
+And. I think going slowly recently,
+I build a report, I don't even use all these other dashboards.
+Right. So you use one specific like piece of agency analytics, right?
+Yeah. Yeah. So that's what I'm saying.
+Like, I don't need all of this.
+It's actually just one part of it.
+And I don't need all the connections.
+And then so the trick is like.
+And then I don't really think you could find a way to make it work.
+If you can almost just build one.
+The first MVP is like one standard report that we that's the same for everyone.
+And then I just use I could just use it for everyone that fits that like template.
+Yeah. And then I could just keep agency analytics for the more complicated clients
+that have extra stuff on it and still reduce my cost.
+What's the base cost of agency analytics before you add clients?
+Right.
+So I pay one hundred seventy nine dollars a month for 10 clients.
+And then I pay now eight dollars, I pay 18, but 20.
+I've got another I've got.
+I don't know how many I have. OK, cool.
+But I've got at least 20, I'd say, clients.
+Because I'm paying almost 10, that's probably four hundred dollars. Yeah.
+Yeah. So, yeah, I could be I think I could like live on the 10
+of just my more complicated clients. Yeah.
+And all the other simple ones I just keep on on like the very standard templates.
+So it's just a report like this table of contents.
+I'm not even that worried about the table of contents.
+And this is Google ads.
+So it obviously is fetching the Google ads data out of Google ads.
+My Google ads accounts.
+It has the impressions of the ads.
+It clicks on the ads.
+This is this is this is your site.
+This is on the storyteller, essentially.
+This is on a client of mine called EasyDocs.
+OK, fine. Yeah.
+So the impressions clicks, the click through rate,
+the average cost per click, the conversions, the conversion rate,
+the amount of budget I spent.
+And this is some info on a campaign like that's just the same info laid out.
+Like sometimes there's more than one campaign that splits out.
+This is these clients.
+We have more than one account for them for a certain reason.
+So that's the same thing.
+But, yeah, we wouldn't have to have to just you just have one Google ads
+and then one Google Analytics.
+So the Google Analytics then collects the sessions.
+These things go key events,
+page views.
+I mean, even this stuff is more that it comes in.
+I care about sessions, total users.
+This like circle that shows like which channel brings in the people.
+Yeah. And this is active users.
+This is that. And then these things are quite important.
+It shows you basically these are events that are built in Google Analytics
+that then we measure as like the goals of campaigns.
+So someone completed a thank you form or click your WhatsApp button
+or contact us clicks.
+So this is the same thing.
+And they've got they've got three sites.
+I'll try to find a different client who also does.
+And so and so the standard your standard client,
+the report is Google ads, Google Analytics.
+And that's and rank tracking.
+So I'll try to find.
+Now, there's no get into kind.
+They have multiple sites, too, but it is probably
+they are integrated as well.
+So I do actually have an app.
+So I probably will keep indicate
+as a client on agency because they sometimes want the six month report
+and indicate like different reports.
+That is just easy for me to call.
+And what's what's the what's the cadence of these?
+The normal report once a month or what? Yeah, once a month.
+Yeah. So they just have a Google Analytics.
+Same thing compares last months or last periods.
+So when you send this to people, is it a live report that they go online
+or is it like a year or how do they consume it?
+There's an option for that.
+But all I care about is a printable that they're like.
+So I send it as an email.
+It looks like this.
+I do send the email, but I have a schedule that does it for me
+if I want to auto send it.
+So I just say what time frame to to collect it on.
+And then it has an email.
+And there's a user.
+They hit the button to view report, but have one client.
+You can't do it like having it as a PDF attachment
+would be like almost better than what it is now.
+So they can just get the PDF attachments.
+OK, so you don't care about live interaction on the charts
+like the line.
+I don't. Yeah, I don't.
+Even if I like, you know, these guys, they've got like a whole presenting option.
+I just present that on my screen in a call just like this.
+I don't let them go like move around and change dates and stuff.
+They just get a monthly report. Yeah.
+But what if they what?
+What if they OK, just theoretically, just could you just go down this path?
+If what if you're presenting these charts or they're looking at the charts
+and they're like, oh, there was a dip and they want to know, like,
+what did it dip to or whatever?
+And you like you can't easily determine that just by eyeballing it.
+Like is that I just go to Google Analytics. OK, all right, cool.
+Yeah, I just pull up the actual Google Analytics and look at it there.
+This is and this is the Google ads for like Intercape like that.
+So the same thing I can see is like different campaigns.
+So then it has each a conversion rate and things like that.
+And then this is the rank tracker.
+So this is if I do SEO for a client, then we track their keywords.
+And it's pretty much just like the ranking, the change from the previous month.
+There's being better and in the volume.
+I don't really care about being I mean, care about these things.
+Those are just I don't even care about those that much.
+They're just there.
+And then some of my clients, this is more I probably wouldn't do it either.
+They're like they have.
+It's not that important. They have.
+They have a shopper shopper fire integration.
+There's probably more admin trying to sort out than what it's worth.
+And so it's all the same.
+And then there's a shopper fire
+thing that just grabs information out of shopper fire.
+But in order for this to work, we actually have to day shop
+like this agency analytics as an app that they that you authorize in shopper
+fire and is able to send them the thing.
+So I think there's a way to complicate it.
+And I don't really need it.
+Yeah. And it'd be cool.
+Like the goal, I think, like if you could build, if we could build something
+just for like my standard, rather than more Google ads clients,
+you spend below twenty thousand around a month.
+And all it is really like Google Analytics, Google Ads and maybe rank tracking.
+Those three things. That's all I need, really.
+Yeah, I think this is doable.
+Now, what I'm wondering is like, OK, so frequency is is
+once a month, you want to have these reports.
+So like an ideal conditions, the querying for this data is once a month.
+That's the case. Right.
+Yeah. Ideally, once a month, but it'd probably be useful to be able to like
+make a call at our course and and be able to select your time range.
+Yeah. And then.
+OK. How many are you?
+How many of these like are you anticipating?
+It's like how many clients per month?
+And how long do you want the data to be retained?
+Or do you imagine a day like do you want data going back once a month to like?
+Five years ago or like, you know, no, like I guess
+all I really want is maybe up to a year so you could compare
+last this January to last January.
+If I had it any further, then I can just do it in Google Analytics.
+So then if you want, if if like, let's say we both this and you
+you you want the ability then to also query that scenario
+to say, I want to look at last year, January versus this year.
+Uh, a little bit.
+It's more that like you could show comparison so that you could take
+like, I don't know if you saw it says like this is the sessions
+that 10 percent more than January last year.
+OK. But you obviously have to have that data to make that comparison.
+Yeah. And how
+do you know the cost of the course?
+Are they quite low? Are they zero?
+Uh, so that's the other trick, the trickiest thing, actually, I think.
+Well, I think you you just have to like create a Google Cloud project
+and pay the Google Cloud fees.
+And I think the Google Cloud fees will actually not be that much.
+The hardest part will be.
+So I actually looked at it a while ago because like, oh, maybe I can build
+like a cool Google Ads tool and I think they'll give you access,
+but you actually have to motivate for it.
+So I found it where you apply to get your API into the Google Ads API
+and you need to write them a message and just say like, I'm building this.
+But you can just say, I'm building a reporting platform for a software agency.
+And then I'm pretty sure they'll be like, cool, here's your thing.
+And then you have to have a Google Cloud project and then they'll charge you on that.
+And I think you'd probably be cheaper than this.
+So, for instance, this one.
+Keyword data comes out of.
+So, yeah, I mean, they charge.
+I can get keyword data out of Google Ads for search volume.
+That's what I'm using for the search volume for my tool I've already built.
+So they actually just use the same thing.
+So whatever it is, it's cheaper than they charging me.
+I don't know if that makes sense.
+Yes. And how do you set up a new client?
+Like, what is it like?
+Do you how do you handle, you know, setting up a new client with?
+With basically like, how do you get their Google data?
+Yeah, so the way it works is I have access through my accounts that I've connected here.
+So. I'm just trying to think the best way to show you.
+I can just show you for random.
+Let's see what happens.
+So, like.
+I do this, I can choose a template.
+I don't have a template for that.
+Then that I don't use any of these.
+And I say add.
+Hopefully it doesn't say I need more credit.
+What's going on?
+Oh, yeah, so it adds a client like that.
+That's here.
+I just get a screenshot, obviously, of my home page.
+Then I go into this kind of client dashboard and I go to data sources.
+And then I can connect data source.
+So these are all the things that they have a lot of options.
+But I don't need like it, like I don't need five percent of these things.
+It's just Google ads.
+So I say I go to Google Analytics is the most.
+So I click Google Analytics.
+And then these are the accounts that I've connected into.
+And a Linux agency, which basically with the Google or I don't know if that makes sense.
+You they've authorized you to.
+So I have access, for instance, this is my Google Analytics account.
+These are all Google Analytics accounts that I granted access to as an administrator.
+They've granted you access.
+How would I access this information?
+Would I be under your account essentially?
+Well, the way they do it is they.
+Have you ever seen one of those things, you know, about like you can sign into your accounts as Google?
+Yes. They do a similar thing to that.
+Like I. I say, well, yeah, you can just do it like this.
+Connect to Google account.
+This thing pops up. I choose which account I want to use.
+So like the other ones are probably connected, really.
+And then it just says Google allowed to access info about you.
+So I say continue.
+And then it chooses which like this.
+It tells me which like
+that your client, how do your clients, where they go, like to authorize you.
+So I've been authorized on their account in a different place,
+like in Google Analytics and account management.
+This is what you tell them to do.
+Yeah. So you can see Storyteller dot SEO at Gmail dot com as access to this account.
+At a certain level of administration level to the thing,
+and then I can access and do a certain number of things.
+And then what they are doing, they're just allowing their software
+to look through Storyteller dot SEO Gmail at my Google Analytics account and get all that data.
+I guess what I'm saying is the the the method for me.
+The method for this software to do it would use.
+I would have I would assume an API key from your Google account.
+Yeah, pretty much.
+So you don't have to worry about my my client's access.
+Like I just talked to them and they manually give me access.
+All with this, you have to connect the software you make
+and allow a look through through the Google API to Google Analytics,
+using the accounts authorization for Gmail account for Google account.
+So for like Storyteller SEO at Gmail dot com.
+Yeah, I think that I think, yeah, it would be a count through yours.
+And then you only get to see the data from the accounts
+that have been authorized on that account.
+Yeah, absolutely.
+OK, cool. I'm.
+I'm definitely interested in like I'm going to at least like do some thinking
+and understand the kind of like what I would build
+the requirements, the sticking points on on this one, on the reporting one.
+I understand, like, you know, the first kind of MVP
+would be Google Analytics and then and then Google Ads and then
+the ranking one.
+This recording, I can see the kind of like charts and stuff and data.
+It'd be good if like, I don't know if there's any information you can send me.
+So like one would be like, could you send me a report or an example report? Yeah.
+Yeah, a live one would be if I can access one that like
+I can actually see the HTML would be kind of helpful,
+but a PDF of what you want as well is available.
+What else is there anything else around this that we haven't talked about
+that you haven't mentioned that you think is important?
+Not really.
+That like I don't think we're trying to build.
+You'll be trying to necessarily build this exact thing
+because it's very complicated.
+Like, you know, they've built a whole reports build.
+So I don't think you should necessarily do that.
+No, I would I would build a thing that allows you to just generate
+the standard report. Yeah.
+So just it would be a standard report.
+So then if at all is that, then not.
+Yeah, then it's not like obviously that's super complicated.
+Like, because I don't know if you looked at that.
+You can know this whole this whole sidebar.
+I can click it and I can choose the integrations that I have
+worth and then I can go in there.
+But that's I think there's so much stuff and I'm not actually interested in that.
+I just I just have a very standard report,
+which would be exactly what I should hear like Google Analytics, the same data.
+And then Google ads,
+same data as I have here.
+And then maybe the rank tracking, which it would be done through that API.
+The only minor complicated thing that's not necessarily standard is.
+Is these they call key events in Google Analytics.
+So like these things, yeah, if you have a look at this.
+I choose the property, but it's usually automated.
+So for one client, I can make one.
+Account that's allocated to it, so it knows which, you know,
+it's not just storyteller is here.
+It has to go storyteller is here and then easy doctors to see other data, for instance.
+Right. And then it's the metric I'm looking for is the key events.
+And then I go here and I choose which key event to to look for.
+And then it pulls through all the key events
+that are shown that I've created in Google Analytics.
+And then I just choose the one.
+So that would probably you would probably have to that.
+I would have to be able to somehow choose which key event to show in each one
+and then generate a new one. I said, be like, this cloded.
+And then choose which key event to show in that graph.
+So when you you wouldn't want it to just like automate that.
+To show you. The key events that have data.
+Yeah, you can do that, too.
+Cool. Yeah, I mean, that is so near real.
+To your part, I think.
+So I'll send you a report, a basic report, one of these, and then
+maybe just tell you, you can access it back in because I sent you that invite.
+I can access this. Yes. Yeah.
+So I don't know if that causes your life.
+Yeah, I think that that's fine.
+Which account is like the best for me to look at?
+And it's a do you have an account that I can mess with?
+That's like you don't mind me clicking on things.
+So there's a I've left a client one that is very confusing.
+I can make another one. I can make a secret Africa one for you.
+Yeah. And then you can mess around with that one.
+I think that's very cool. Yeah.
+So I'll do that. I'll make I'll make the standard one in secret.
+I don't rank Google ads, but.
+Maybe I'll make one for Storyteller.
+Because I run ads for story.
+So you have Google Analytics data for Storyteller, Google ads data
+and some ranking data so that you can see the three main things.
+OK, awesome. Thanks.
+Cool. Well, yeah, I mean, yeah, just to see how you feel.
+Yeah, it's a pretty big project.
+Maybe you need to focus on getting it.
+I don't know. I'll see.
+Look, I look I want to do some coding.
+I want to do a little coding at least every day.
+That's my aim. And this I want to see how I build this system.
+And if the system is like, you know, includes kind of like
+back in infrastructure where I have to learn how to do that.
+I think that's kind of a bonus for me.
+I can imagine this does have some back in infrastructure.
+It's definitely like the front end, maybe on the reporting.
+But that stuff is kind of easy for me.
+So, yeah, I'm basically just going to do a little like thinking exploration
+and in how I build the system and what are the requirements and stuff
+and then have a better idea this week, like like if it's viable and
+and how long it'll take me and stuff.
+Well, yeah, what I've actually wondered about that is, you know,
+I don't know if they storing they're not getting like a whole because you'll see
+if you ever change the date, then you get a spinner on all of the graphs
+that show a spinner as it's obviously going, drawing in the information.
+But I'm not sure they store it all for long.
+They don't storing a year's worth of data.
+I don't think I think that's stored.
+In Google Analytics, and then they just refer
+they're getting it for their reports and saving it for that moment.
+Then if you reset it, maybe they get it again. I don't know.
+Yeah, so that's the other thing, actually, I was going to ask you.
+It's like when you do reports, is it
+is it quite
+and non-granular in the sense of like, is it the report for January,
+the report for February, the report for March?
+Or are you doing sliding scale on dates
+where it's like you're getting the report from the 13th of March to,
+you know, the 14th of April or, you know, what?
+The standard is the first to the first, the last month.
+Then I think I could do quite a nice thing to store the data.
+And then it's like you only query it once if it's like historic.
+Yeah, like that's almost what I just do for like a lot of my
+just know that standard clients is just like
+or base level guys that anyone there's some people.
+So then the other thing that this does is it sends the report
+automatically to them if I want to.
+So there's some clients I know that like
+they don't really want to have a meeting with me.
+They just want to get a report
+and know that someone's looking after the Google ads.
+I send it to them.
+My invoice automatically sends to them and they pay my invoice.
+And I'm like, cool, I don't even talk to them.
+I just run the ads.
+And then next month, they get a report and the automated invoice
+because zero says my invoice.
+I've sent a recurring thing and they get an invoice.
+And like, cool, as long as their business is doing well,
+they just pay the invoice.
+And then later, like these amazing clients that are like,
+I don't even talk to them really.
+I sometimes worry like, oh, like over time, they might disappear.
+But it's actually not a problem because
+as long as I'm doing the work for them
+and their business is growing, they're chilled.
+It's if they're like they see a dip or something,
+then they're like, oh, this is happening.
+And then we dive in deeper.
+Yeah.
+So like, I think the main goal, if we did it,
+it would be like, say, I clear out 10 of the 24 clients
+that are in here and then just leave the rest
+that are like more complicated reports.
+Yeah, yeah. Makes sense.
+Sweet. OK.
+All right. I'll see you tomorrow morning.
+Yeah.
+See you. Are you running?
+So we're swimming at like 7.20.
+Yeah, let's do 7.20 swimming.
+OK, cool. Check it out.
+Cheers, Alex.
+Thanks, man. Ciao.

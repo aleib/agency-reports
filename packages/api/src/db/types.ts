@@ -1,5 +1,11 @@
 import type { ColumnType, Generated, Insertable, Selectable, Updateable } from "kysely";
 
+// Enum types
+export type DataSourceType = "google_analytics" | "google_ads" | "rank_tracker";
+export type DataSourceStatus = "active" | "expired" | "disconnected";
+export type JobType = "snapshot" | "render" | "email" | "full_report";
+export type JobStatus = "pending" | "running" | "completed" | "failed";
+
 // Database column types
 export interface UsersTable {
   id: Generated<string>;

@@ -7,6 +7,8 @@ import { getDb, closeDb } from "./db/database.js";
 import authPlugin from "./plugins/auth.js";
 import { authRoutes } from "./routes/auth.routes.js";
 import { clientRoutes } from "./routes/clients.routes.js";
+import { oauthRoutes } from "./routes/oauth.routes.js";
+import { snapshotRoutes } from "./routes/snapshots.routes.js";
 import { AppError } from "./lib/errors.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -69,6 +71,8 @@ server.setErrorHandler((error: Error & { validation?: unknown }, _request, reply
 // Register routes
 await server.register(authRoutes);
 await server.register(clientRoutes);
+await server.register(oauthRoutes);
+await server.register(snapshotRoutes);
 
 // Health check endpoint
 server.get("/health", async () => {

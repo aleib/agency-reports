@@ -15,6 +15,13 @@ export interface ClientListItem {
   createdAt: Date;
 }
 
+function formatSnapshotDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 export async function listClients(userId: string): Promise<ClientListItem[]> {
   const db = getDb();
 
@@ -70,7 +77,9 @@ export async function listClients(userId: string): Promise<ClientListItem[]> {
     timezone: client.timezone,
     contactEmails: client.contact_emails,
     dataSources: dataSourcesByClient.get(client.id) ?? [],
-    lastReportDate: latestSnapshotByClient.get(client.id)?.toISOString() ?? null,
+    lastReportDate: latestSnapshotByClient.get(client.id)
+      ? formatSnapshotDate(latestSnapshotByClient.get(client.id)!)
+      : null,
     createdAt: client.created_at,
   }));
 }
@@ -110,7 +119,9 @@ export async function getClient(id: string, userId: string): Promise<ClientListI
     timezone: client.timezone,
     contactEmails: client.contact_emails,
     dataSources: dataSources.map((ds) => ({ type: ds.type, status: ds.status })),
-    lastReportDate: latestSnapshot?.snapshot_date.toISOString() ?? null,
+    lastReportDate: latestSnapshot?.snapshot_date
+      ? formatSnapshotDate(latestSnapshot.snapshot_date)
+      : null,
     createdAt: client.created_at,
   };
 }

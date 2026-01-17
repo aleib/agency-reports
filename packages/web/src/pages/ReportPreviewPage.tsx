@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
-import { useParams, useSearchParams, Link } from "react-router-dom";
-import { api } from "../lib/api";
+import { useEffect, useState } from "react";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { Button } from "../components/ui/Button";
 import { Spinner } from "../components/ui/Spinner";
+import { api } from "../lib/api";
 
 export function ReportPreviewPage() {
   const { clientId } = useParams<{ clientId: string }>();
@@ -42,12 +42,15 @@ export function ReportPreviewPage() {
       setPreviewHtml(html);
     } catch (err) {
       setError("Failed to load report preview. The report may not exist yet.");
+      console.error(err);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const monthLabel = new Date(month + "-01").toLocaleDateString("en-US", {
+  const [monthYearStr, monthMonthStr] = month.split("-");
+  const monthLabelDate = new Date(Number(monthYearStr), Number(monthMonthStr) - 1, 1);
+  const monthLabel = monthLabelDate.toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
   });

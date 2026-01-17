@@ -49,6 +49,13 @@ export interface SnapshotSummary {
   createdAt: Date;
 }
 
+function formatSnapshotDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 /**
  * Generate a snapshot for a client for a specific month
  */
@@ -182,7 +189,7 @@ export async function generateSnapshot(
     return {
       id: snapshot.id,
       clientId: snapshot.client_id,
-      snapshotDate: snapshot.snapshot_date.toISOString().split("T")[0]!,
+      snapshotDate: formatSnapshotDate(snapshot.snapshot_date),
       templateVersion: snapshot.template_version,
       hasPdf: !!snapshot.pdf_storage_path,
       metricsSummary: snapshot.metrics_summary as Record<string, number>,
@@ -207,7 +214,7 @@ export async function generateSnapshot(
   return {
     id: snapshot.id,
     clientId: snapshot.client_id,
-    snapshotDate: snapshot.snapshot_date.toISOString().split("T")[0]!,
+    snapshotDate: formatSnapshotDate(snapshot.snapshot_date),
     templateVersion: snapshot.template_version,
     hasPdf: false,
     metricsSummary: snapshot.metrics_summary as Record<string, number>,
@@ -258,7 +265,7 @@ export async function listSnapshots(
     snapshots: snapshots.map((s) => ({
       id: s.id,
       clientId: s.client_id,
-      snapshotDate: s.snapshot_date.toISOString().split("T")[0]!,
+      snapshotDate: formatSnapshotDate(s.snapshot_date),
       templateVersion: s.template_version,
       hasPdf: !!s.pdf_storage_path,
       metricsSummary: s.metrics_summary as Record<string, number>,
@@ -298,7 +305,7 @@ export async function getSnapshotData(
     ? await loadSnapshotDataFromPath(snapshot.storage_path)
     : await loadSnapshotData(
         snapshot.client_id,
-        snapshot.snapshot_date.toISOString().split("T")[0]!
+        formatSnapshotDate(snapshot.snapshot_date)
       );
 
   return data as unknown as SnapshotData;
@@ -336,7 +343,7 @@ export async function getSnapshot(
   return {
     id: snapshot.id,
     clientId: snapshot.client_id,
-    snapshotDate: snapshot.snapshot_date.toISOString().split("T")[0]!,
+    snapshotDate: formatSnapshotDate(snapshot.snapshot_date),
     templateVersion: snapshot.template_version,
     hasPdf: !!snapshot.pdf_storage_path,
     metricsSummary: snapshot.metrics_summary as Record<string, number>,

@@ -159,6 +159,7 @@ export function ClientDetailPage() {
   };
 
   const ga4DataSource = dataSources.find((ds) => ds.type === "google_analytics");
+  const reportSnapshots = snapshots.filter((snapshot) => snapshot.hasPdf);
 
   if (isLoading) {
     return (
@@ -343,11 +344,11 @@ export function ClientDetailPage() {
             <CardTitle>Report History</CardTitle>
           </CardHeader>
 
-          {snapshots.length === 0 ? (
+          {reportSnapshots.length === 0 ? (
             <p className="text-gray-600 text-center py-8">No reports generated yet</p>
           ) : (
             <div className="divide-y divide-gray-200">
-              {snapshots.map((snapshot) => (
+              {reportSnapshots.map((snapshot) => (
                 <SnapshotRow key={snapshot.id} snapshot={snapshot} clientId={clientId!} />
               ))}
             </div>

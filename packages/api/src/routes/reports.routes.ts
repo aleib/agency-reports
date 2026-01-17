@@ -6,7 +6,7 @@ import {
   type SnapshotData,
 } from "../services/snapshot.service.js";
 import { renderReportPdf, renderReportPreview } from "../services/render.service.js";
-import { savePdfFile, loadPdfFile } from "../services/storage.service.js";
+import { savePdfFile, loadPdfFile, loadPdfFileFromPath } from "../services/storage.service.js";
 import { NotFoundError, ValidationError } from "../lib/errors.js";
 
 export async function reportRoutes(fastify: FastifyInstance) {
@@ -40,7 +40,7 @@ export async function reportRoutes(fastify: FastifyInstance) {
 
     const existing = await db
       .selectFrom("snapshots")
-      .select("id")
+      .select("snapshots.id")
       .innerJoin("clients", "clients.id", "snapshots.client_id")
       .where("snapshots.client_id", "=", clientId)
       .where("snapshots.snapshot_date", "=", new Date(snapshotDate))
@@ -171,10 +171,15 @@ export async function reportRoutes(fastify: FastifyInstance) {
     }
 
     // Load PDF
-    const snapshotDate = snapshot.snapshot_date.toISOString().split("T")[0]!;
-    const pdfBuffer = await loadPdfFile(snapshot.client_id, snapshotDate);
+    const pdfBuffer = snapshot.pdf_storage_path
+      ? await loadPdfFileFromPath(snapshot.pdf_storage_path)
+      : await loadPdfFile(
+          snapshot.client_id,
+          snapshot.snapshot_date.toISOString().split("T")[0]!
+        );
 
     // Generate filename
+    const snapshotDate = snapshot.snapshot_date.toISOString().split("T")[0]!;
     const clientNameSlug = snapshot.client_name.toLowerCase().replace(/\s+/g, "-");
     const filename = `${clientNameSlug}-report-${snapshotDate}.pdf`;
 

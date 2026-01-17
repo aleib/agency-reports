@@ -99,6 +99,13 @@ export async function loadPdfFile(
 }
 
 /**
+ * Load PDF file from a stored file path
+ */
+export async function loadPdfFileFromPath(filePath: string): Promise<Buffer> {
+  return fs.readFile(filePath);
+}
+
+/**
  * Check if snapshot exists
  */
 export async function snapshotExists(

@@ -36,6 +36,22 @@ async function authPlugin(fastify: FastifyInstance) {
     "authenticate",
     async function (request: FastifyRequest, _reply: FastifyReply) {
       try {
+        const authHeader = request.headers.authorization;
+        const bearerToken = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : undefined;
+        const queryToken =
+          typeof request.query === "object" &&
+          request.query !== null &&
+          "token" in request.query
+            ? (request.query as Record<string, unknown>).token
+            : undefined;
+        const token = bearerToken ?? (typeof queryToken === "string" ? queryToken : undefined);
+
+        if (token) {
+          const payload = fastify.jwt.verify<{ userId: string }>(token);
+          request.userId = payload.userId;
+          return;
+        }
+
         await request.jwtVerify();
         request.userId = request.user.userId;
       } catch {

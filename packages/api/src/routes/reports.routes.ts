@@ -1,13 +1,13 @@
 import type { FastifyInstance } from "fastify";
 import { getDb } from "../db/database.js";
+import { NotFoundError, ValidationError } from "../lib/errors.js";
+import { renderReportPdf, renderReportPreview } from "../services/render.service.js";
 import {
   generateSnapshot,
   getSnapshotData,
   type SnapshotData,
 } from "../services/snapshot.service.js";
-import { renderReportPdf, renderReportPreview } from "../services/render.service.js";
-import { savePdfFile, loadPdfFile, loadPdfFileFromPath } from "../services/storage.service.js";
-import { NotFoundError, ValidationError } from "../lib/errors.js";
+import { loadPdfFile, loadPdfFileFromPath, savePdfFile } from "../services/storage.service.js";
 
 export async function reportRoutes(fastify: FastifyInstance) {
   // All report routes require authentication

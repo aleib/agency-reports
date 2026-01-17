@@ -186,7 +186,7 @@ interface ReportGeneratorProps {
 function ReportGenerator({ clientId, hasGA4, onGenerated }: ReportGeneratorProps) {
   const [month, setMonth] = useState(() => {
     const now = new Date();
-    now.setMonth(now.getMonth() - 1);
+    now.setMonth(now.getMonth());
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   });
   const [isGenerating, setIsGenerating] = useState(false);

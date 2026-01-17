@@ -1,12 +1,13 @@
 import type {
+  ApiError,
+  AuthResponse,
+  ClientDetail,
+  ClientListItem,
+  CreateClientRequest,
+  DataSourceType,
   LoginRequest,
   RegisterRequest,
-  AuthResponse,
-  ClientListItem,
-  ClientDetail,
-  CreateClientRequest,
   UpdateClientRequest,
-  ApiError,
 } from "@agency-reports/shared";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
@@ -35,8 +36,9 @@ class ApiClient {
     options: RequestInit = {}
   ): Promise<T> {
     const token = this.getToken();
+    const hasBody = options.body !== undefined;
     const headers: Record<string, string> = {
-      "Content-Type": "application/json",
+      ...(hasBody ? { "Content-Type": "application/json" } : {}),
       ...(options.headers as Record<string, string>),
     };
 
@@ -131,9 +133,11 @@ class ApiClient {
 
   // OAuth endpoints
   async getGoogleOAuthUrl(
-    clientId: string
-  ): Promise<{ url: string; state: string }> {
-    return this.request(`/oauth/google/url?clientId=${clientId}`);
+    clientId: string,
+    type: DataSourceType
+  ): Promise<{ url: string }> {
+    const params = new URLSearchParams({ clientId, type });
+    return this.request(`/oauth/google/url?${params.toString()}`);
   }
 
   // Snapshot endpoints

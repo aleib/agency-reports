@@ -180,41 +180,49 @@ Build a lightweight monthly reporting platform for a marketing agency. MVP gener
 
 ---
 
-## Phase 5: Frontend MVP
+## Phase 5: Frontend MVP ✅ COMPLETE
 
 ### 5.1 React Setup
 
-- [ ] Vite + React 19 + TypeScript
-- [ ] TailwindCSS for styling
-- [ ] React Router for navigation
-- [ ] Simple API client with fetch
+- [x] Vite + React 19 + TypeScript
+- [x] TailwindCSS for styling
+- [x] React Router for navigation
+- [x] Simple API client with fetch
 
 ### 5.2 Core Pages
 
-- [ ] **Login Page** - Email/password form
-- [ ] **Dashboard** - Client list with status indicators
-- [ ] **Client Detail Page**:
+- [x] **Login Page** - Email/password form
+- [x] **Dashboard** - Client list with status indicators
+- [x] **Client Detail Page**:
   - Basic client info (editable)
   - Data source connection status
   - "Connect Google Analytics" button (OAuth flow)
   - Snapshot history list
   - "Generate Report" button
   - PDF download links
-- [ ] **Report Preview** - Embedded HTML preview (iframe)
+- [x] **Report Preview** - Embedded HTML preview (iframe)
 
 ### 5.3 UI Components
 
-- [ ] Keep it simple - use minimal custom components
-- [ ] Focus on functionality over polish
+- [x] Keep it simple - use minimal custom components
+- [x] Focus on functionality over polish
 
-**Files to create:**
+**Files created:**
 
 - `packages/web/src/pages/LoginPage.tsx`
 - `packages/web/src/pages/DashboardPage.tsx`
 - `packages/web/src/pages/ClientDetailPage.tsx`
 - `packages/web/src/pages/ReportPreviewPage.tsx`
 - `packages/web/src/lib/api.ts`
-- `packages/web/src/components/` (as needed)
+- `packages/web/src/components/ui/Button.tsx`
+- `packages/web/src/components/ui/Input.tsx`
+- `packages/web/src/components/ui/Card.tsx`
+- `packages/web/src/components/ui/Badge.tsx`
+- `packages/web/src/components/ui/Spinner.tsx`
+- `packages/web/src/components/ui/Modal.tsx`
+- `packages/web/src/components/Layout.tsx`
+- `packages/web/src/components/ProtectedRoute.tsx`
+- `packages/web/src/context/AuthContext.tsx`
 
 ---
 

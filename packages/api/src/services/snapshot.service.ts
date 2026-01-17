@@ -1,13 +1,13 @@
-import { getDb } from "../db/database.js";
 import {
+  calculateChange,
   fetchGA4Metrics,
   getMonthDateRange,
   getPreviousMonthDateRange,
-  calculateChange,
   type GA4Metrics,
 } from "../connectors/google-analytics.connector.js";
-import { saveSnapshotData, loadSnapshotData } from "./storage.service.js";
+import { getDb } from "../db/database.js";
 import { NotFoundError, ValidationError } from "../lib/errors.js";
+import { loadSnapshotData, loadSnapshotDataFromPath, saveSnapshotData } from "./storage.service.js";
 
 export interface SnapshotData {
   clientId: string;
@@ -286,8 +286,12 @@ export async function getSnapshotData(
     throw new NotFoundError("Snapshot not found");
   }
 
-  const snapshotDate = snapshot.snapshot_date.toISOString().split("T")[0]!;
-  const data = await loadSnapshotData(snapshot.client_id, snapshotDate);
+  const data = snapshot.storage_path
+    ? await loadSnapshotDataFromPath(snapshot.storage_path)
+    : await loadSnapshotData(
+        snapshot.client_id,
+        snapshot.snapshot_date.toISOString().split("T")[0]!
+      );
 
   return data as unknown as SnapshotData;
 }

@@ -47,7 +47,7 @@ export function ClientDetailPage() {
 
   const handleConnectGA = async () => {
     try {
-      const { url } = await api.getGoogleOAuthUrl(clientId!);
+      const { url } = await api.getGoogleOAuthUrl(clientId!, "google_analytics");
       window.location.href = url;
     } catch {
       setError("Failed to initiate Google OAuth");

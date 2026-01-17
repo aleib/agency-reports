@@ -61,6 +61,16 @@ export async function loadSnapshotData(
 }
 
 /**
+ * Load snapshot JSON data from a stored file path
+ */
+export async function loadSnapshotDataFromPath(
+  filePath: string
+): Promise<Record<string, unknown>> {
+  const content = await fs.readFile(filePath, "utf-8");
+  return JSON.parse(content);
+}
+
+/**
  * Save PDF file
  */
 export async function savePdfFile(

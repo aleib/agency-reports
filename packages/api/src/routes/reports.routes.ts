@@ -90,7 +90,7 @@ export async function reportRoutes(fastify: FastifyInstance) {
     let snapshotId: string;
     const existing = await db
       .selectFrom("snapshots")
-      .select(["id", "pdf_storage_path"])
+      .select(["snapshots.id as id", "snapshots.pdf_storage_path"])
       .innerJoin("clients", "clients.id", "snapshots.client_id")
       .where("snapshots.client_id", "=", clientId)
       .where("snapshots.snapshot_date", "=", new Date(snapshotDate))

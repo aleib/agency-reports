@@ -189,6 +189,7 @@ function ReportGenerator({ clientId, hasGA4, onGenerated }: ReportGeneratorProps
     now.setMonth(now.getMonth());
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   });
+  const [shouldRegenerate, setShouldRegenerate] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -199,7 +200,7 @@ function ReportGenerator({ clientId, hasGA4, onGenerated }: ReportGeneratorProps
     setSuccess(null);
 
     try {
-      await api.generateReport(clientId, month);
+      await api.generateReport(clientId, month, shouldRegenerate);
       setSuccess("Report generated successfully!");
       onGenerated();
     } catch (err) {
@@ -220,6 +221,18 @@ function ReportGenerator({ clientId, hasGA4, onGenerated }: ReportGeneratorProps
           onChange={(e) => setMonth(e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
+      </div>
+      <div className="flex items-center gap-2">
+        <input
+          id="regenerate-report"
+          type="checkbox"
+          checked={shouldRegenerate}
+          onChange={(e) => setShouldRegenerate(e.target.checked)}
+          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+        />
+        <label htmlFor="regenerate-report" className="text-sm text-gray-700">
+          Regenerate report (overwrite existing PDF)
+        </label>
       </div>
 
       {!hasGA4 && (

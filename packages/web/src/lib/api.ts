@@ -166,9 +166,14 @@ class ApiClient {
 
   async generateReport(
     clientId: string,
-    month: string
+    month: string,
+    regenerate = false
   ): Promise<{ snapshotId: string; pdfPath: string }> {
-    return this.request(`/clients/${clientId}/reports?month=${month}`, {
+    const params = new URLSearchParams({ month });
+    if (regenerate) {
+      params.set("regenerate", "true");
+    }
+    return this.request(`/clients/${clientId}/reports?${params.toString()}`, {
       method: "POST",
     });
   }

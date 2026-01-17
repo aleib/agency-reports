@@ -7,7 +7,12 @@ import {
   getSnapshotData,
   type SnapshotData,
 } from "../services/snapshot.service.js";
-import { loadPdfFile, loadPdfFileFromPath, savePdfFile } from "../services/storage.service.js";
+import {
+  fileExists,
+  loadPdfFile,
+  loadPdfFileFromPath,
+  savePdfFile,
+} from "../services/storage.service.js";
 
 export async function reportRoutes(fastify: FastifyInstance) {
   // All report routes require authentication
@@ -40,7 +45,7 @@ export async function reportRoutes(fastify: FastifyInstance) {
 
     const existing = await db
       .selectFrom("snapshots")
-      .select("snapshots.id")
+      .select(["snapshots.id", "snapshots.storage_path"])
       .innerJoin("clients", "clients.id", "snapshots.client_id")
       .where("snapshots.client_id", "=", clientId)
       .where("snapshots.snapshot_date", "=", new Date(snapshotDate))
@@ -48,7 +53,15 @@ export async function reportRoutes(fastify: FastifyInstance) {
       .executeTakeFirst();
 
     if (existing) {
-      snapshotData = await getSnapshotData(existing.id, request.userId);
+      const hasStoredSnapshot = existing.storage_path
+        ? await fileExists(existing.storage_path)
+        : false;
+      if (!hasStoredSnapshot) {
+        const snapshot = await generateSnapshot(clientId, request.userId, year, monthNum, true);
+        snapshotData = await getSnapshotData(snapshot.id, request.userId);
+      } else {
+        snapshotData = await getSnapshotData(existing.id, request.userId);
+      }
     } else {
       // Generate snapshot on-the-fly for preview
       const snapshot = await generateSnapshot(clientId, request.userId, year, monthNum);
@@ -90,7 +103,11 @@ export async function reportRoutes(fastify: FastifyInstance) {
     let snapshotId: string;
     const existing = await db
       .selectFrom("snapshots")
-      .select(["snapshots.id as id", "snapshots.pdf_storage_path"])
+      .select([
+        "snapshots.id as id",
+        "snapshots.storage_path",
+        "snapshots.pdf_storage_path",
+      ])
       .innerJoin("clients", "clients.id", "snapshots.client_id")
       .where("snapshots.client_id", "=", clientId)
       .where("snapshots.snapshot_date", "=", new Date(snapshotDate))
@@ -106,7 +123,15 @@ export async function reportRoutes(fastify: FastifyInstance) {
           pdfPath: existing.pdf_storage_path,
         };
       }
-      snapshotId = existing.id;
+      const hasStoredSnapshot = existing.storage_path
+        ? await fileExists(existing.storage_path)
+        : false;
+      if (!hasStoredSnapshot) {
+        const snapshot = await generateSnapshot(clientId, request.userId, year, monthNum, true);
+        snapshotId = snapshot.id;
+      } else {
+        snapshotId = existing.id;
+      }
     } else {
       // Generate new snapshot
       const snapshot = await generateSnapshot(clientId, request.userId, year, monthNum);

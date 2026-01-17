@@ -119,8 +119,16 @@ export async function generateSnapshot(
     const propertyId = ga4DataSource.external_account_id;
 
     const [currentMetrics, previousMetrics] = await Promise.all([
-      fetchGA4Metrics(ga4DataSource.id, propertyId, currentRange),
-      fetchGA4Metrics(ga4DataSource.id, propertyId, previousRange),
+      fetchGA4Metrics(ga4DataSource.id, propertyId, currentRange, {
+        clientId,
+        snapshotDate,
+        label: "current",
+      }),
+      fetchGA4Metrics(ga4DataSource.id, propertyId, previousRange, {
+        clientId,
+        snapshotDate,
+        label: "previous",
+      }),
     ]);
 
     snapshotData.ga4 = {

@@ -49,6 +49,36 @@ export async function saveSnapshotData(
 }
 
 /**
+ * Check if a file exists
+ */
+export async function fileExists(filePath: string): Promise<boolean> {
+  try {
+    await fs.access(filePath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Save raw GA4 API payloads for debugging
+ */
+export async function saveGa4DebugPayload(
+  clientId: string,
+  snapshotDate: string,
+  label: string,
+  payload: Record<string, unknown>
+): Promise<string> {
+  const snapshotDir = getSnapshotPath(clientId, snapshotDate);
+  await ensureDir(snapshotDir);
+
+  const filePath = path.join(snapshotDir, `ga4-raw-${label}.json`);
+  await fs.writeFile(filePath, JSON.stringify(payload, null, 2));
+
+  return filePath;
+}
+
+/**
  * Load snapshot JSON data
  */
 export async function loadSnapshotData(

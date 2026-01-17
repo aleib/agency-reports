@@ -1,4 +1,5 @@
 import { google } from "googleapis";
+import { saveGa4DebugPayload } from "../services/storage.service.js";
 import { getAuthenticatedClient } from "./google-auth.js";
 
 export interface GA4Property {
@@ -70,7 +71,8 @@ export async function listGA4Properties(dataSourceId: string): Promise<GA4Proper
 export async function fetchGA4Metrics(
   dataSourceId: string,
   propertyId: string,
-  dateRange: DateRange
+  dateRange: DateRange,
+  debugContext?: { clientId: string; snapshotDate: string; label: string }
 ): Promise<GA4Metrics> {
   const auth = await getAuthenticatedClient(dataSourceId);
   const analyticsData = google.analyticsdata({ version: "v1beta", auth });
@@ -146,6 +148,19 @@ export async function fetchGA4Metrics(
       name: row.dimensionValues?.[0]?.value ?? "Unknown",
       count: parseFloat(row.metricValues?.[0]?.value ?? "0"),
     }));
+
+  if (process.env.GA4_DEBUG_CAPTURE === "true" && debugContext) {
+    await saveGa4DebugPayload(debugContext.clientId, debugContext.snapshotDate, debugContext.label, {
+      fetchedAt: new Date().toISOString(),
+      propertyId,
+      dateRange,
+      responses: {
+        mainMetrics: mainMetricsResponse.data,
+        channels: channelResponse.data,
+        keyEvents: keyEventsResponse.data,
+      },
+    });
+  }
 
   return {
     sessions: parseFloat(mainValues[0]?.value ?? "0"),

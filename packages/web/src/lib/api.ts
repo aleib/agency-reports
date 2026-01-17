@@ -147,6 +147,31 @@ class ApiClient {
     return this.request(`/clients/${clientId}/snapshots`);
   }
 
+  async getClientDataSources(
+    clientId: string
+  ): Promise<{ dataSources: ClientDataSource[] }> {
+    return this.request(`/clients/${clientId}/data-sources`);
+  }
+
+  async getGa4Properties(
+    clientId: string,
+    dataSourceId: string
+  ): Promise<{ properties: GA4Property[] }> {
+    return this.request(`/clients/${clientId}/data-sources/${dataSourceId}/properties`);
+  }
+
+  async updateDataSourceProperty(
+    clientId: string,
+    dataSourceId: string,
+    propertyId: string,
+    propertyName: string
+  ): Promise<{ success: true }> {
+    return this.request(`/clients/${clientId}/data-sources/${dataSourceId}`, {
+      method: "PUT",
+      body: JSON.stringify({ propertyId, propertyName }),
+    });
+  }
+
   async generateSnapshot(
     clientId: string,
     month: string,
@@ -207,6 +232,21 @@ export interface SnapshotSummary {
     pageviews?: number;
   };
   createdAt: string;
+}
+
+export interface ClientDataSource {
+  id: string;
+  type: string;
+  status: string;
+  externalAccountId: string | null;
+  externalAccountName: string | null;
+  connectedAt: string;
+  config: Record<string, unknown>;
+}
+
+export interface GA4Property {
+  propertyId: string;
+  displayName: string;
 }
 
 export const api = new ApiClient();

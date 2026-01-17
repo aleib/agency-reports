@@ -8,20 +8,28 @@ import { Card, CardHeader, CardTitle } from "../components/ui/Card";
 import { Input } from "../components/ui/Input";
 import { Modal } from "../components/ui/Modal";
 import { Spinner } from "../components/ui/Spinner";
-import { api, type SnapshotSummary } from "../lib/api";
+import { api, type ClientDataSource, type GA4Property, type SnapshotSummary } from "../lib/api";
 
 export function ClientDetailPage() {
   const { clientId } = useParams<{ clientId: string }>();
   const [client, setClient] = useState<ClientDetail | null>(null);
+  const [dataSources, setDataSources] = useState<ClientDataSource[]>([]);
   const [snapshots, setSnapshots] = useState<SnapshotSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [ga4Properties, setGa4Properties] = useState<GA4Property[]>([]);
+  const [selectedGa4PropertyId, setSelectedGa4PropertyId] = useState("");
+  const [isLoadingGa4Properties, setIsLoadingGa4Properties] = useState(false);
+  const [isSavingGa4Property, setIsSavingGa4Property] = useState(false);
+  const [ga4PropertyError, setGa4PropertyError] = useState<string | null>(null);
+  const [ga4PropertySuccess, setGa4PropertySuccess] = useState<string | null>(null);
 
   useEffect(() => {
     if (clientId) {
       loadClient();
       loadSnapshots();
+      loadDataSources();
     }
   }, [clientId]);
 
@@ -45,6 +53,15 @@ export function ClientDetailPage() {
     }
   };
 
+  const loadDataSources = async () => {
+    try {
+      const { dataSources } = await api.getClientDataSources(clientId!);
+      setDataSources(dataSources);
+    } catch {
+      // Data sources might not exist yet
+    }
+  };
+
   const handleConnectGA = async () => {
     try {
       const { url } = await api.getGoogleOAuthUrl(clientId!, "google_analytics");
@@ -54,7 +71,63 @@ export function ClientDetailPage() {
     }
   };
 
-  const ga4Source = client?.dataSources.find((ds) => ds.type === "google_analytics");
+  const handleLoadGa4Properties = async () => {
+    if (!clientId) return;
+    const ga4DataSource = dataSources.find((ds) => ds.type === "google_analytics");
+    if (!ga4DataSource) return;
+
+    setIsLoadingGa4Properties(true);
+    setGa4PropertyError(null);
+    setGa4PropertySuccess(null);
+
+    try {
+      const { properties } = await api.getGa4Properties(clientId, ga4DataSource.id);
+      setGa4Properties(properties);
+      if (properties.length > 0) {
+        setSelectedGa4PropertyId(properties[0]?.propertyId ?? "");
+      }
+    } catch {
+      setGa4PropertyError("Failed to load GA4 properties");
+    } finally {
+      setIsLoadingGa4Properties(false);
+    }
+  };
+
+  const handleSaveGa4Property = async () => {
+    if (!clientId) return;
+    const ga4DataSource = dataSources.find((ds) => ds.type === "google_analytics");
+    if (!ga4DataSource) return;
+
+    const selectedProperty = ga4Properties.find(
+      (property) => property.propertyId === selectedGa4PropertyId
+    );
+
+    if (!selectedProperty) {
+      setGa4PropertyError("Select a GA4 property");
+      return;
+    }
+
+    setIsSavingGa4Property(true);
+    setGa4PropertyError(null);
+    setGa4PropertySuccess(null);
+
+    try {
+      await api.updateDataSourceProperty(
+        clientId,
+        ga4DataSource.id,
+        selectedProperty.propertyId,
+        selectedProperty.displayName
+      );
+      await loadDataSources();
+      setGa4PropertySuccess("GA4 property saved");
+    } catch {
+      setGa4PropertyError("Failed to save GA4 property");
+    } finally {
+      setIsSavingGa4Property(false);
+    }
+  };
+
+  const ga4DataSource = dataSources.find((ds) => ds.type === "google_analytics");
 
   if (isLoading) {
     return (
@@ -114,13 +187,17 @@ export function ClientDetailPage() {
                 <div>
                   <p className="font-medium text-gray-900">Google Analytics</p>
                   <p className="text-sm text-gray-600">
-                    {ga4Source ? "GA4 Property connected" : "Not connected"}
+                    {ga4DataSource?.externalAccountName
+                      ? `Property: ${ga4DataSource.externalAccountName}`
+                      : ga4DataSource
+                        ? "GA4 connected, property not selected"
+                        : "Not connected"}
                   </p>
                 </div>
               </div>
-              {ga4Source ? (
-                <Badge variant={ga4Source.status === "active" ? "success" : "warning"}>
-                  {ga4Source.status}
+              {ga4DataSource ? (
+                <Badge variant={ga4DataSource.status === "active" ? "success" : "warning"}>
+                  {ga4DataSource.status}
                 </Badge>
               ) : (
                 <Button size="sm" onClick={handleConnectGA}>
@@ -128,6 +205,65 @@ export function ClientDetailPage() {
                 </Button>
               )}
             </div>
+            {ga4DataSource && !ga4DataSource.externalAccountId && (
+              <div className="rounded-lg border border-gray-200 bg-white p-4 space-y-3">
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Select GA4 property</p>
+                  <p className="text-xs text-gray-600">
+                    Choose the GA4 property to use for report metrics.
+                  </p>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="ga4-property" className="text-sm text-gray-700">
+                    GA4 Property
+                  </label>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <select
+                      id="ga4-property"
+                      value={selectedGa4PropertyId}
+                      onChange={(e) => setSelectedGa4PropertyId(e.target.value)}
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      {ga4Properties.length === 0 && (
+                        <option value="">Load properties to select</option>
+                      )}
+                      {ga4Properties.map((property) => (
+                        <option key={property.propertyId} value={property.propertyId}>
+                          {property.displayName} ({property.propertyId})
+                        </option>
+                      ))}
+                    </select>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={handleLoadGa4Properties}
+                        isLoading={isLoadingGa4Properties}
+                      >
+                        Load properties
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={handleSaveGa4Property}
+                        isLoading={isSavingGa4Property}
+                      >
+                        Save
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+                {ga4PropertyError && (
+                  <div className="bg-red-50 text-red-700 p-3 rounded-lg text-sm">
+                    {ga4PropertyError}
+                  </div>
+                )}
+                {ga4PropertySuccess && (
+                  <div className="bg-green-50 text-green-700 p-3 rounded-lg text-sm">
+                    {ga4PropertySuccess}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </Card>
 
@@ -138,7 +274,11 @@ export function ClientDetailPage() {
           </CardHeader>
           <ReportGenerator
             clientId={clientId!}
-            hasGA4={!!ga4Source && ga4Source.status === "active"}
+            hasGA4={
+              !!ga4DataSource &&
+              ga4DataSource.status === "active" &&
+              !!ga4DataSource.externalAccountId
+            }
             onGenerated={loadSnapshots}
           />
         </Card>

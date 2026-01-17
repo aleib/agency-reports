@@ -175,3 +175,11 @@ export async function listSnapshots(clientId: string): Promise<string[]> {
     return [];
   }
 }
+
+/**
+ * Delete all storage for a client
+ */
+export async function deleteClientStorage(clientId: string): Promise<void> {
+  const clientDir = getClientPath(clientId);
+  await fs.rm(clientDir, { recursive: true, force: true });
+}

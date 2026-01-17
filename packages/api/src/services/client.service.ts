@@ -1,6 +1,7 @@
 import { getDb } from "../db/database.js";
 import type { Client } from "../db/types.js";
 import { NotFoundError } from "../lib/errors.js";
+import { deleteClientStorage } from "./storage.service.js";
 import type { CreateClientInput, UpdateClientInput } from "../lib/validation.js";
 
 export interface ClientListItem {
@@ -176,13 +177,22 @@ export async function updateClient(
 export async function deleteClient(id: string, userId: string): Promise<void> {
   const db = getDb();
 
-  const result = await db
-    .deleteFrom("clients")
+  const existing = await db
+    .selectFrom("clients")
+    .select("id")
     .where("id", "=", id)
     .where("created_by", "=", userId)
     .executeTakeFirst();
 
-  if (result.numDeletedRows === 0n) {
+  if (!existing) {
     throw new NotFoundError("Client not found");
   }
+
+  await deleteClientStorage(id);
+
+  await db
+    .deleteFrom("clients")
+    .where("id", "=", id)
+    .where("created_by", "=", userId)
+    .executeTakeFirst();
 }

@@ -1,6 +1,6 @@
 import type { ClientDetail } from "@agency-reports/shared";
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { Layout } from "../components/Layout";
 import { Badge } from "../components/ui/Badge";
 import { Button } from "../components/ui/Button";
@@ -24,6 +24,11 @@ export function ClientDetailPage() {
   const [isSavingGa4Property, setIsSavingGa4Property] = useState(false);
   const [ga4PropertyError, setGa4PropertyError] = useState<string | null>(null);
   const [ga4PropertySuccess, setGa4PropertySuccess] = useState<string | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmName, setDeleteConfirmName] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (clientId) {
@@ -32,6 +37,12 @@ export function ClientDetailPage() {
       loadDataSources();
     }
   }, [clientId]);
+
+  useEffect(() => {
+    if (!showDeleteModal) return;
+    setDeleteConfirmName("");
+    setDeleteError(null);
+  }, [showDeleteModal]);
 
   const loadClient = async () => {
     try {
@@ -127,6 +138,26 @@ export function ClientDetailPage() {
     }
   };
 
+  const handleDeleteClient = async () => {
+    if (!clientId || !client) return;
+    if (deleteConfirmName.trim() !== client.name) {
+      setDeleteError("Type the client name exactly to confirm deletion.");
+      return;
+    }
+
+    setIsDeleting(true);
+    setDeleteError(null);
+
+    try {
+      await api.deleteClient(clientId);
+      navigate("/");
+    } catch {
+      setDeleteError("Failed to delete client");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const ga4DataSource = dataSources.find((ds) => ds.type === "google_analytics");
 
   if (isLoading) {
@@ -163,9 +194,30 @@ export function ClientDetailPage() {
           {client.primaryDomain && <p className="text-gray-600 mt-1">{client.primaryDomain}</p>}
           <p className="text-sm text-gray-500 mt-1">Timezone: {client.timezone}</p>
         </div>
-        <Button variant="secondary" onClick={() => setShowEditModal(true)}>
-          Edit Client
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="secondary" onClick={() => setShowEditModal(true)}>
+            Edit Client
+          </Button>
+          <Button
+            variant="dangerIcon"
+            aria-label="Delete client"
+            onClick={() => setShowDeleteModal(true)}
+          >
+            <svg
+              className="h-5 w-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3m-4 0h14"
+              />
+            </svg>
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -313,6 +365,44 @@ export function ClientDetailPage() {
           setShowEditModal(false);
         }}
       />
+
+      <Modal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        title="Delete Client"
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              onClick={handleDeleteClient}
+              isLoading={isDeleting}
+              disabled={deleteConfirmName.trim() !== client.name}
+              aria-label="Confirm delete client"
+            >
+              Delete Client
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            This permanently deletes the client, data sources, snapshots, and stored PDFs.
+          </div>
+          <Input
+            label="Type client name to confirm"
+            value={deleteConfirmName}
+            onChange={(e) => setDeleteConfirmName(e.target.value)}
+            placeholder={client.name}
+            aria-label="Type client name to confirm"
+          />
+          {deleteError && (
+            <div className="bg-red-50 text-red-700 p-3 rounded-lg text-sm">{deleteError}</div>
+          )}
+        </div>
+      </Modal>
     </Layout>
   );
 }
@@ -400,7 +490,11 @@ interface SnapshotRowProps {
 }
 
 function SnapshotRow({ snapshot, clientId }: SnapshotRowProps) {
-  const date = new Date(snapshot.snapshotDate);
+  const [yearStr, monthStr, dayStr] = snapshot.snapshotDate.split("-");
+  const year = Number(yearStr);
+  const month = Number(monthStr);
+  const day = Number(dayStr);
+  const date = new Date(year, month - 1, day);
   const monthLabel = date.toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",

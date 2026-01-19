@@ -1,14 +1,14 @@
 import Fastify from "fastify";
-import puppeteer from "puppeteer";
-import Handlebars from "handlebars";
 import { promises as fs } from "fs";
+import Handlebars from "handlebars";
 import path from "path";
+import puppeteer from "puppeteer";
 import { fileURLToPath } from "url";
 import {
-  renderChannelsPieChart,
-  renderDonutChart,
-  renderSparklineChart,
-  renderTimeSeriesChart,
+    renderChannelsPieChart,
+    renderDonutChart,
+    renderSparklineChart,
+    renderTimeSeriesChart,
 } from "./charts.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -252,6 +252,151 @@ function normalizeSeries(series: number[], targetLength: number): number[] {
   return [...series, ...Array(targetLength - series.length).fill(0)];
 }
 
+async function buildReportContext(data: SnapshotData) {
+  let channelsPieChart = "";
+  let sessionsTrendChart = "";
+  let usersTrendChart = "";
+  let sparklineCharts: Record<string, string> = {};
+  let keyEventDonuts: Array<{
+    name: string;
+    total: number;
+    chart: string;
+  }> = [];
+  let pageViewBars: Array<{
+    path: string;
+    views: number;
+    percent: number;
+  }> = [];
+
+  if (data.ga4) {
+    const currentDaily = data.ga4.current.dailyMetrics ?? [];
+    const previousDaily = data.ga4.previous.dailyMetrics ?? [];
+    const labels = currentDaily.map((point) => formatShortDate(point.date));
+
+    const sessionsSeries = currentDaily.map((point) => point.sessions);
+    const previousSessionsSeries = normalizeSeries(
+      previousDaily.map((point) => point.sessions),
+      labels.length
+    );
+
+    const usersSeries = currentDaily.map((point) => point.users);
+    const previousUsersSeries = normalizeSeries(
+      previousDaily.map((point) => point.users),
+      labels.length
+    );
+
+    const [
+      pieChart,
+      sessionsChart,
+      usersChart,
+      sessionsSpark,
+      bounceSpark,
+      pageviewsSpark,
+      avgSessionSpark,
+      activeUsersSpark,
+      newUsersSpark,
+      engagementSpark,
+      engagementRateSpark,
+    ] = await Promise.all([
+      renderChannelsPieChart(data.ga4.current.channels, data.ga4.current.sessions),
+      renderTimeSeriesChart({
+        labels,
+        current: sessionsSeries,
+        previous: previousSessionsSeries,
+        color: "#f59e0b",
+      }),
+      renderTimeSeriesChart({
+        labels,
+        current: usersSeries,
+        previous: previousUsersSeries,
+        color: "#f97316",
+        fill: true,
+      }),
+      renderSparklineChart(sessionsSeries, "#f59e0b"),
+      renderSparklineChart(
+        currentDaily.map((point) => point.bounceRate),
+        "#f59e0b"
+      ),
+      renderSparklineChart(
+        currentDaily.map((point) => point.pageviews),
+        "#f59e0b"
+      ),
+      renderSparklineChart(
+        currentDaily.map((point) => point.avgSessionDuration),
+        "#f59e0b"
+      ),
+      renderSparklineChart(
+        currentDaily.map((point) => point.activeUsers),
+        "#f59e0b"
+      ),
+      renderSparklineChart(
+        currentDaily.map((point) => point.newUsers),
+        "#f59e0b"
+      ),
+      renderSparklineChart(
+        currentDaily.map((point) => point.userEngagementDuration),
+        "#f59e0b"
+      ),
+      renderSparklineChart(
+        currentDaily.map((point) => point.engagementRate),
+        "#f59e0b"
+      ),
+    ]);
+
+    channelsPieChart = pieChart;
+    sessionsTrendChart = sessionsChart;
+    usersTrendChart = usersChart;
+    sparklineCharts = {
+      sessions: sessionsSpark,
+      bounceRate: bounceSpark,
+      pageviews: pageviewsSpark,
+      avgSessionDuration: avgSessionSpark,
+      activeUsers: activeUsersSpark,
+      newUsers: newUsersSpark,
+      userEngagementDuration: engagementSpark,
+      engagementRate: engagementRateSpark,
+    };
+
+    keyEventDonuts = (
+      await Promise.all(
+        (data.ga4.current.keyEventBreakdowns ?? []).map(async (event) => ({
+          name: event.name,
+          total: event.total,
+          chart: await renderDonutChart({
+            labels: event.channels.map((channel) => channel.name),
+            data: event.channels.map((channel) => channel.count),
+            centerText: String(event.total),
+            centerSubtext: "Key Events",
+          }),
+        }))
+      )
+    ).filter((event) => event.chart);
+
+    const topPages = data.ga4.current.topPages ?? [];
+    const maxViews = Math.max(...topPages.map((page) => page.views), 0);
+    pageViewBars = topPages.map((page) => ({
+      path: page.path,
+      views: page.views,
+      percent: maxViews > 0 ? (page.views / maxViews) * 100 : 0,
+    }));
+  }
+
+  return {
+    ...data,
+    styles: templateStyles,
+    periodLabel: formatPeriodLabel(data.snapshotDate),
+    generatedAtFormatted: formatDate(data.generatedAt),
+    periodStart: formatDate(data.periodStart),
+    periodEnd: formatDate(data.periodEnd),
+    channelsPieChart,
+    sessionsTrendChart,
+    usersTrendChart,
+    sparklineCharts,
+    keyEventDonuts,
+    pageViewBars,
+  };
+}
+
 // Render report from snapshot data
 server.post<{ Body: { data: SnapshotData } }>(
   "/render/report",
@@ -266,150 +411,7 @@ server.post<{ Body: { data: SnapshotData } }>(
       await loadTemplate();
     }
 
-    // Generate charts if GA4 data exists
-    let channelsPieChart = "";
-    let sessionsTrendChart = "";
-    let usersTrendChart = "";
-    let sparklineCharts: Record<string, string> = {};
-    let keyEventDonuts: Array<{
-      name: string;
-      total: number;
-      chart: string;
-    }> = [];
-    let pageViewBars: Array<{
-      path: string;
-      views: number;
-      percent: number;
-    }> = [];
-
-    if (data.ga4) {
-      const currentDaily = data.ga4.current.dailyMetrics ?? [];
-      const previousDaily = data.ga4.previous.dailyMetrics ?? [];
-      const labels = currentDaily.map((point) => formatShortDate(point.date));
-
-      const sessionsSeries = currentDaily.map((point) => point.sessions);
-      const previousSessionsSeries = normalizeSeries(
-        previousDaily.map((point) => point.sessions),
-        labels.length
-      );
-
-      const usersSeries = currentDaily.map((point) => point.users);
-      const previousUsersSeries = normalizeSeries(
-        previousDaily.map((point) => point.users),
-        labels.length
-      );
-
-      const [
-        pieChart,
-        sessionsChart,
-        usersChart,
-        sessionsSpark,
-        bounceSpark,
-        pageviewsSpark,
-        avgSessionSpark,
-        activeUsersSpark,
-        newUsersSpark,
-        engagementSpark,
-        engagementRateSpark,
-      ] = await Promise.all([
-        renderChannelsPieChart(data.ga4.current.channels, data.ga4.current.sessions),
-        renderTimeSeriesChart({
-          labels,
-          current: sessionsSeries,
-          previous: previousSessionsSeries,
-          color: "#f59e0b",
-        }),
-        renderTimeSeriesChart({
-          labels,
-          current: usersSeries,
-          previous: previousUsersSeries,
-          color: "#f97316",
-          fill: true,
-        }),
-        renderSparklineChart(sessionsSeries, "#f59e0b"),
-        renderSparklineChart(
-          currentDaily.map((point) => point.bounceRate),
-          "#f59e0b"
-        ),
-        renderSparklineChart(
-          currentDaily.map((point) => point.pageviews),
-          "#f59e0b"
-        ),
-        renderSparklineChart(
-          currentDaily.map((point) => point.avgSessionDuration),
-          "#f59e0b"
-        ),
-        renderSparklineChart(
-          currentDaily.map((point) => point.activeUsers),
-          "#f59e0b"
-        ),
-        renderSparklineChart(
-          currentDaily.map((point) => point.newUsers),
-          "#f59e0b"
-        ),
-        renderSparklineChart(
-          currentDaily.map((point) => point.userEngagementDuration),
-          "#f59e0b"
-        ),
-        renderSparklineChart(
-          currentDaily.map((point) => point.engagementRate),
-          "#f59e0b"
-        ),
-      ]);
-
-      channelsPieChart = pieChart;
-      sessionsTrendChart = sessionsChart;
-      usersTrendChart = usersChart;
-      sparklineCharts = {
-        sessions: sessionsSpark,
-        bounceRate: bounceSpark,
-        pageviews: pageviewsSpark,
-        avgSessionDuration: avgSessionSpark,
-        activeUsers: activeUsersSpark,
-        newUsers: newUsersSpark,
-        userEngagementDuration: engagementSpark,
-        engagementRate: engagementRateSpark,
-      };
-
-      keyEventDonuts = (
-        await Promise.all(
-          (data.ga4.current.keyEventBreakdowns ?? []).map(async (event) => ({
-            name: event.name,
-            total: event.total,
-            chart: await renderDonutChart({
-              labels: event.channels.map((channel) => channel.name),
-              data: event.channels.map((channel) => channel.count),
-              centerText: String(event.total),
-              centerSubtext: "Key Events",
-            }),
-          }))
-        )
-      ).filter((event) => event.chart);
-
-      const topPages = data.ga4.current.topPages ?? [];
-      const maxViews = Math.max(...topPages.map((page) => page.views), 0);
-      pageViewBars = topPages.map((page) => ({
-        path: page.path,
-        views: page.views,
-        percent: maxViews > 0 ? (page.views / maxViews) * 100 : 0,
-      }));
-    }
-
-    // Prepare template context
-    const context = {
-      ...data,
-      styles: templateStyles,
-      periodLabel: formatPeriodLabel(data.snapshotDate),
-      generatedAtFormatted: formatDate(data.generatedAt),
-      periodStart: formatDate(data.periodStart),
-      periodEnd: formatDate(data.periodEnd),
-      channelsPieChart,
-      sessionsTrendChart,
-      usersTrendChart,
-      sparklineCharts,
-      keyEventDonuts,
-      pageViewBars,
-    };
+    const context = await buildReportContext(data);
 
     // Render HTML
     const html = reportTemplate!(context);
@@ -457,32 +459,7 @@ server.post<{ Body: { data: SnapshotData } }>(
       await loadTemplate();
     }
 
-    // Generate charts if GA4 data exists
-    let channelsPieChart = "";
-    let comparisonChart = "";
-
-    if (data.ga4) {
-      const [pieChart, barChart] = await Promise.all([
-        renderChannelsPieChart(data.ga4.current.channels),
-        renderComparisonChart(
-          buildComparisonMetrics(data.ga4.current, data.ga4.previous)
-        ),
-      ]);
-      channelsPieChart = pieChart;
-      comparisonChart = barChart;
-    }
-
-    // Prepare template context
-    const context = {
-      ...data,
-      styles: templateStyles,
-      periodLabel: formatPeriodLabel(data.snapshotDate),
-      generatedAtFormatted: formatDate(data.generatedAt),
-      periodStart: formatDate(data.periodStart),
-      periodEnd: formatDate(data.periodEnd),
-      channelsPieChart,
-      comparisonChart,
-    };
+    const context = await buildReportContext(data);
 
     // Render HTML
     const html = reportTemplate!(context);

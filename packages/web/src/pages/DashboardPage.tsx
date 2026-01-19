@@ -1,14 +1,14 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { api } from "../lib/api";
 import type { ClientListItem } from "@agency-reports/shared";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { Layout } from "../components/Layout";
+import { Badge } from "../components/ui/Badge";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
-import { Badge } from "../components/ui/Badge";
-import { Spinner } from "../components/ui/Spinner";
-import { Modal } from "../components/ui/Modal";
 import { Input } from "../components/ui/Input";
+import { Modal } from "../components/ui/Modal";
+import { Spinner } from "../components/ui/Spinner";
+import { api } from "../lib/api";
 
 export function DashboardPage() {
   const [clients, setClients] = useState<ClientListItem[]>([]);
@@ -25,7 +25,7 @@ export function DashboardPage() {
       const { clients } = await api.getClients();
       setClients(clients);
     } catch (err) {
-      setError("Failed to load clients");
+      setError(`Failed to load clients: ${err instanceof Error ? err.message : "Unknown error"}`);
     } finally {
       setIsLoading(false);
     }
@@ -128,6 +128,7 @@ function ClientCard({ client }: { client: ClientListItem }) {
     (ds) => ds.type === "google_analytics"
   );
 
+
   return (
     <Link to={`/clients/${client.id}`}>
       <Card className="hover:shadow-md transition-shadow cursor-pointer">
@@ -188,7 +189,7 @@ function AddClientModal({ isOpen, onClose, onCreated }: AddClientModalProps) {
       setName("");
       setPrimaryDomain("");
     } catch (err) {
-      setError("Failed to create client");
+      setError(`Failed to create client: ${err instanceof Error ? err.message : "Unknown error"}`);
     } finally {
       setIsSubmitting(false);
     }

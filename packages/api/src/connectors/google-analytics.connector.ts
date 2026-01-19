@@ -14,6 +14,25 @@ export interface GA4Metrics {
   pageviews: number;
   avgSessionDuration: number;
   bounceRate: number;
+  activeUsers: number;
+  engagementRate: number;
+  userEngagementDuration: number;
+  dailyMetrics: Array<{
+    date: string;
+    sessions: number;
+    users: number;
+    newUsers: number;
+    pageviews: number;
+    avgSessionDuration: number;
+    bounceRate: number;
+    activeUsers: number;
+    engagementRate: number;
+    userEngagementDuration: number;
+  }>;
+  topPages: Array<{
+    path: string;
+    views: number;
+  }>;
   channels: Array<{
     name: string;
     sessions: number;
@@ -23,6 +42,14 @@ export interface GA4Metrics {
   keyEvents: Array<{
     name: string;
     count: number;
+  }>;
+  keyEventBreakdowns: Array<{
+    name: string;
+    total: number;
+    channels: Array<{
+      name: string;
+      count: number;
+    }>;
   }>;
 }
 
@@ -89,12 +116,36 @@ export async function fetchGA4Metrics(
         { name: "screenPageViews" },
         { name: "averageSessionDuration" },
         { name: "bounceRate" },
+        { name: "activeUsers" },
+        { name: "engagementRate" },
+        { name: "userEngagementDuration" },
       ],
     },
   });
 
   const mainRow = mainMetricsResponse.data.rows?.[0];
   const mainValues = mainRow?.metricValues ?? [];
+
+  // Fetch daily metrics for sparklines and time series charts
+  const dailyMetricsResponse = await analyticsData.properties.runReport({
+    property: `properties/${propertyId}`,
+    requestBody: {
+      dateRanges: [{ startDate: dateRange.startDate, endDate: dateRange.endDate }],
+      dimensions: [{ name: "date" }],
+      metrics: [
+        { name: "sessions" },
+        { name: "totalUsers" },
+        { name: "newUsers" },
+        { name: "screenPageViews" },
+        { name: "averageSessionDuration" },
+        { name: "bounceRate" },
+        { name: "activeUsers" },
+        { name: "engagementRate" },
+        { name: "userEngagementDuration" },
+      ],
+      orderBys: [{ dimension: { dimensionName: "date" } }],
+    },
+  });
 
   // Fetch channel breakdown
   const channelResponse = await analyticsData.properties.runReport({
@@ -118,6 +169,18 @@ export async function fetchGA4Metrics(
       users: parseFloat(row.metricValues?.[1]?.value ?? "0"),
       percentage: totalSessions > 0 ? (channelSessions / totalSessions) * 100 : 0,
     };
+  });
+
+  // Fetch top page views by path
+  const pageViewsResponse = await analyticsData.properties.runReport({
+    property: `properties/${propertyId}`,
+    requestBody: {
+      dateRanges: [{ startDate: dateRange.startDate, endDate: dateRange.endDate }],
+      dimensions: [{ name: "pagePath" }],
+      metrics: [{ name: "screenPageViews" }],
+      orderBys: [{ metric: { metricName: "screenPageViews" }, desc: true }],
+      limit: "4",
+    },
   });
 
   // Fetch key events (conversions)
@@ -149,6 +212,72 @@ export async function fetchGA4Metrics(
       count: parseFloat(row.metricValues?.[0]?.value ?? "0"),
     }));
 
+  const topKeyEvents = keyEvents.slice(0, Math.min(4, keyEvents.length));
+  const keyEventBreakdownResponses = await Promise.all(
+    topKeyEvents.map((event) =>
+      analyticsData.properties.runReport({
+        property: `properties/${propertyId}`,
+        requestBody: {
+          dateRanges: [{ startDate: dateRange.startDate, endDate: dateRange.endDate }],
+          dimensions: [{ name: "eventName" }, { name: "sessionDefaultChannelGroup" }],
+          metrics: [{ name: "keyEvents" }],
+          dimensionFilter: {
+            filter: {
+              fieldName: "eventName",
+              stringFilter: {
+                matchType: "EXACT",
+                value: event.name,
+              },
+            },
+          },
+          orderBys: [{ metric: { metricName: "keyEvents" }, desc: true }],
+          limit: "6",
+        },
+      })
+    )
+  );
+
+  const keyEventBreakdowns = keyEventBreakdownResponses.map((response, index) => {
+    const eventName = topKeyEvents[index]?.name ?? "Unknown";
+    const rows = response.data.rows ?? [];
+    const channels = rows
+      .map((row) => ({
+        name: row.dimensionValues?.[1]?.value ?? "Unknown",
+        count: parseFloat(row.metricValues?.[0]?.value ?? "0"),
+      }))
+      .filter((channel) => channel.count > 0);
+    const total = channels.reduce((sum, channel) => sum + channel.count, 0);
+    return {
+      name: eventName,
+      total,
+      channels,
+    };
+  });
+
+  const dailyRows = dailyMetricsResponse.data.rows ?? [];
+  const dailyMetrics = dailyRows.map((row) => {
+    const metricValues = row.metricValues ?? [];
+    const dateValue = row.dimensionValues?.[0]?.value ?? "";
+    return {
+      date: formatGa4Date(dateValue),
+      sessions: parseFloat(metricValues[0]?.value ?? "0"),
+      users: parseFloat(metricValues[1]?.value ?? "0"),
+      newUsers: parseFloat(metricValues[2]?.value ?? "0"),
+      pageviews: parseFloat(metricValues[3]?.value ?? "0"),
+      avgSessionDuration: parseFloat(metricValues[4]?.value ?? "0"),
+      bounceRate: parseFloat(metricValues[5]?.value ?? "0") * 100,
+      activeUsers: parseFloat(metricValues[6]?.value ?? "0"),
+      engagementRate: parseFloat(metricValues[7]?.value ?? "0") * 100,
+      userEngagementDuration: parseFloat(metricValues[8]?.value ?? "0"),
+    };
+  });
+
+  const pageViewsRows = pageViewsResponse.data.rows ?? [];
+  const topPages = pageViewsRows.map((row) => ({
+    path: row.dimensionValues?.[0]?.value ?? "/",
+    views: parseFloat(row.metricValues?.[0]?.value ?? "0"),
+  }));
+
   if (process.env.GA4_DEBUG_CAPTURE === "true" && debugContext) {
     await saveGa4DebugPayload(debugContext.clientId, debugContext.snapshotDate, debugContext.label, {
       fetchedAt: new Date().toISOString(),
@@ -156,8 +285,11 @@ export async function fetchGA4Metrics(
       dateRange,
       responses: {
         mainMetrics: mainMetricsResponse.data,
+        dailyMetrics: dailyMetricsResponse.data,
         channels: channelResponse.data,
+        topPages: pageViewsResponse.data,
         keyEvents: keyEventsResponse.data,
+        keyEventBreakdowns: keyEventBreakdownResponses.map((response) => response.data),
       },
     });
   }
@@ -169,8 +301,14 @@ export async function fetchGA4Metrics(
     pageviews: parseFloat(mainValues[3]?.value ?? "0"),
     avgSessionDuration: parseFloat(mainValues[4]?.value ?? "0"),
     bounceRate: parseFloat(mainValues[5]?.value ?? "0") * 100, // Convert to percentage
+    activeUsers: parseFloat(mainValues[6]?.value ?? "0"),
+    engagementRate: parseFloat(mainValues[7]?.value ?? "0") * 100,
+    userEngagementDuration: parseFloat(mainValues[8]?.value ?? "0"),
+    dailyMetrics,
+    topPages,
     channels,
     keyEvents,
+    keyEventBreakdowns,
   };
 }
 
@@ -208,4 +346,12 @@ export function getPreviousMonthDateRange(year: number, month: number): DateRang
 
 function formatDate(date: Date): string {
   return date.toISOString().split("T")[0]!;
+}
+
+function formatGa4Date(dateValue: string): string {
+  if (!dateValue || dateValue.length !== 8) return dateValue;
+  const year = dateValue.slice(0, 4);
+  const month = dateValue.slice(4, 6);
+  const day = dateValue.slice(6, 8);
+  return `${year}-${month}-${day}`;
 }

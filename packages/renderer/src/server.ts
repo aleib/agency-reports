@@ -6,8 +6,9 @@ import path from "path";
 import { fileURLToPath } from "url";
 import {
   renderChannelsPieChart,
-  renderComparisonChart,
-  buildComparisonMetrics,
+  renderDonutChart,
+  renderSparklineChart,
+  renderTimeSeriesChart,
 } from "./charts.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -71,6 +72,40 @@ Handlebars.registerHelper("formatDuration", (seconds: number) => {
   return `${mins}:${secs.toString().padStart(2, "0")}`;
 });
 
+Handlebars.registerHelper("formatDurationHms", (seconds: number) => {
+  if (typeof seconds !== "number" || isNaN(seconds)) return "00:00:00";
+  const totalSeconds = Math.max(0, Math.round(seconds));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const secs = totalSeconds % 60;
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(
+    secs
+  ).padStart(2, "0")}`;
+});
+
+Handlebars.registerHelper("formatDurationWords", (seconds: number) => {
+  if (typeof seconds !== "number" || isNaN(seconds)) return "0s";
+  const totalSeconds = Math.max(0, Math.round(seconds));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const secs = totalSeconds % 60;
+  const parts = [];
+  if (hours > 0) parts.push(`${hours}h`);
+  if (minutes > 0) parts.push(`${minutes}m`);
+  parts.push(`${secs}s`);
+  return parts.join(" ");
+});
+
+Handlebars.registerHelper("formatEventLabel", (value: string) => {
+  if (!value) return "Event";
+  return value
+    .replace(/[_-]+/g, " ")
+    .split(" ")
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+});
+
 // Snapshot data interface
 interface SnapshotData {
   clientId: string;
@@ -92,6 +127,25 @@ interface SnapshotData {
       pageviews: number;
       avgSessionDuration: number;
       bounceRate: number;
+      activeUsers: number;
+      engagementRate: number;
+      userEngagementDuration: number;
+      dailyMetrics: Array<{
+        date: string;
+        sessions: number;
+        users: number;
+        newUsers: number;
+        pageviews: number;
+        avgSessionDuration: number;
+        bounceRate: number;
+        activeUsers: number;
+        engagementRate: number;
+        userEngagementDuration: number;
+      }>;
+      topPages: Array<{
+        path: string;
+        views: number;
+      }>;
       channels: Array<{
         name: string;
         sessions: number;
@@ -101,6 +155,14 @@ interface SnapshotData {
       keyEvents: Array<{
         name: string;
         count: number;
+      }>;
+      keyEventBreakdowns: Array<{
+        name: string;
+        total: number;
+        channels: Array<{
+          name: string;
+          count: number;
+        }>;
       }>;
     };
     previous: {
@@ -110,6 +172,25 @@ interface SnapshotData {
       pageviews: number;
       avgSessionDuration: number;
       bounceRate: number;
+      activeUsers: number;
+      engagementRate: number;
+      userEngagementDuration: number;
+      dailyMetrics: Array<{
+        date: string;
+        sessions: number;
+        users: number;
+        newUsers: number;
+        pageviews: number;
+        avgSessionDuration: number;
+        bounceRate: number;
+        activeUsers: number;
+        engagementRate: number;
+        userEngagementDuration: number;
+      }>;
+      topPages: Array<{
+        path: string;
+        views: number;
+      }>;
       channels: Array<{
         name: string;
         sessions: number;
@@ -120,6 +201,14 @@ interface SnapshotData {
         name: string;
         count: number;
       }>;
+      keyEventBreakdowns: Array<{
+        name: string;
+        total: number;
+        channels: Array<{
+          name: string;
+          count: number;
+        }>;
+      }>;
     };
     changes: {
       sessions: number;
@@ -128,6 +217,9 @@ interface SnapshotData {
       pageviews: number;
       avgSessionDuration: number;
       bounceRate: number;
+      activeUsers: number;
+      engagementRate: number;
+      userEngagementDuration: number;
     };
   };
 }
@@ -148,6 +240,18 @@ function formatDate(dateStr: string): string {
   });
 }
 
+function formatShortDate(dateStr: string): string {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString("en-US", { day: "numeric", month: "short" });
+}
+
+function normalizeSeries(series: number[], targetLength: number): number[] {
+  if (targetLength === 0) return [];
+  if (series.length === targetLength) return series;
+  if (series.length > targetLength) return series.slice(0, targetLength);
+  return [...series, ...Array(targetLength - series.length).fill(0)];
+}
+
 // Render report from snapshot data
 server.post<{ Body: { data: SnapshotData } }>(
   "/render/report",
@@ -164,17 +268,131 @@ server.post<{ Body: { data: SnapshotData } }>(
 
     // Generate charts if GA4 data exists
     let channelsPieChart = "";
-    let comparisonChart = "";
+    let sessionsTrendChart = "";
+    let usersTrendChart = "";
+    let sparklineCharts: Record<string, string> = {};
+    let keyEventDonuts: Array<{
+      name: string;
+      total: number;
+      chart: string;
+    }> = [];
+    let pageViewBars: Array<{
+      path: string;
+      views: number;
+      percent: number;
+    }> = [];
 
     if (data.ga4) {
-      const [pieChart, barChart] = await Promise.all([
-        renderChannelsPieChart(data.ga4.current.channels),
-        renderComparisonChart(
-          buildComparisonMetrics(data.ga4.current, data.ga4.previous)
+      const currentDaily = data.ga4.current.dailyMetrics ?? [];
+      const previousDaily = data.ga4.previous.dailyMetrics ?? [];
+      const labels = currentDaily.map((point) => formatShortDate(point.date));
+
+      const sessionsSeries = currentDaily.map((point) => point.sessions);
+      const previousSessionsSeries = normalizeSeries(
+        previousDaily.map((point) => point.sessions),
+        labels.length
+      );
+
+      const usersSeries = currentDaily.map((point) => point.users);
+      const previousUsersSeries = normalizeSeries(
+        previousDaily.map((point) => point.users),
+        labels.length
+      );
+
+      const [
+        pieChart,
+        sessionsChart,
+        usersChart,
+        sessionsSpark,
+        bounceSpark,
+        pageviewsSpark,
+        avgSessionSpark,
+        activeUsersSpark,
+        newUsersSpark,
+        engagementSpark,
+        engagementRateSpark,
+      ] = await Promise.all([
+        renderChannelsPieChart(data.ga4.current.channels, data.ga4.current.sessions),
+        renderTimeSeriesChart({
+          labels,
+          current: sessionsSeries,
+          previous: previousSessionsSeries,
+          color: "#f59e0b",
+        }),
+        renderTimeSeriesChart({
+          labels,
+          current: usersSeries,
+          previous: previousUsersSeries,
+          color: "#f97316",
+          fill: true,
+        }),
+        renderSparklineChart(sessionsSeries, "#f59e0b"),
+        renderSparklineChart(
+          currentDaily.map((point) => point.bounceRate),
+          "#f59e0b"
+        ),
+        renderSparklineChart(
+          currentDaily.map((point) => point.pageviews),
+          "#f59e0b"
+        ),
+        renderSparklineChart(
+          currentDaily.map((point) => point.avgSessionDuration),
+          "#f59e0b"
+        ),
+        renderSparklineChart(
+          currentDaily.map((point) => point.activeUsers),
+          "#f59e0b"
+        ),
+        renderSparklineChart(
+          currentDaily.map((point) => point.newUsers),
+          "#f59e0b"
+        ),
+        renderSparklineChart(
+          currentDaily.map((point) => point.userEngagementDuration),
+          "#f59e0b"
+        ),
+        renderSparklineChart(
+          currentDaily.map((point) => point.engagementRate),
+          "#f59e0b"
         ),
       ]);
+
       channelsPieChart = pieChart;
-      comparisonChart = barChart;
+      sessionsTrendChart = sessionsChart;
+      usersTrendChart = usersChart;
+      sparklineCharts = {
+        sessions: sessionsSpark,
+        bounceRate: bounceSpark,
+        pageviews: pageviewsSpark,
+        avgSessionDuration: avgSessionSpark,
+        activeUsers: activeUsersSpark,
+        newUsers: newUsersSpark,
+        userEngagementDuration: engagementSpark,
+        engagementRate: engagementRateSpark,
+      };
+
+      keyEventDonuts = (
+        await Promise.all(
+          (data.ga4.current.keyEventBreakdowns ?? []).map(async (event) => ({
+            name: event.name,
+            total: event.total,
+            chart: await renderDonutChart({
+              labels: event.channels.map((channel) => channel.name),
+              data: event.channels.map((channel) => channel.count),
+              centerText: String(event.total),
+              centerSubtext: "Key Events",
+            }),
+          }))
+        )
+      ).filter((event) => event.chart);
+
+      const topPages = data.ga4.current.topPages ?? [];
+      const maxViews = Math.max(...topPages.map((page) => page.views), 0);
+      pageViewBars = topPages.map((page) => ({
+        path: page.path,
+        views: page.views,
+        percent: maxViews > 0 ? (page.views / maxViews) * 100 : 0,
+      }));
     }
 
     // Prepare template context
@@ -186,7 +404,11 @@ server.post<{ Body: { data: SnapshotData } }>(
       periodStart: formatDate(data.periodStart),
       periodEnd: formatDate(data.periodEnd),
       channelsPieChart,
-      comparisonChart,
+      sessionsTrendChart,
+      usersTrendChart,
+      sparklineCharts,
+      keyEventDonuts,
+      pageViewBars,
     };
 
     // Render HTML

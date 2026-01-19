@@ -133,6 +133,25 @@ export interface GA4Metrics {
   pageviews: number;
   avgSessionDuration: number;
   bounceRate: number;
+  activeUsers: number;
+  engagementRate: number;
+  userEngagementDuration: number;
+  dailyMetrics: Array<{
+    date: string;
+    sessions: number;
+    users: number;
+    newUsers: number;
+    pageviews: number;
+    avgSessionDuration: number;
+    bounceRate: number;
+    activeUsers: number;
+    engagementRate: number;
+    userEngagementDuration: number;
+  }>;
+  topPages: Array<{
+    path: string;
+    views: number;
+  }>;
   channels: Array<{
     name: string;
     sessions: number;
@@ -142,6 +161,14 @@ export interface GA4Metrics {
   keyEvents: Array<{
     name: string;
     count: number;
+  }>;
+  keyEventBreakdowns: Array<{
+    name: string;
+    total: number;
+    channels: Array<{
+      name: string;
+      count: number;
+    }>;
   }>;
 }
 
@@ -165,6 +192,9 @@ export interface SnapshotData {
       pageviews: number;
       avgSessionDuration: number;
       bounceRate: number;
+      activeUsers: number;
+      engagementRate: number;
+      userEngagementDuration: number;
     };
   };
 }

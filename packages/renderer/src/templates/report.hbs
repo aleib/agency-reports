@@ -18,126 +18,180 @@
     </header>
 
     {{#if ga4}}
-    <!-- Executive Summary -->
-    <section class="section">
-      <h2 class="section-title">Executive Summary</h2>
-      <div class="metrics-grid">
-        <div class="metric-card">
-          <div class="label">Sessions</div>
-          <div class="value">{{formatNumber ga4.current.sessions}}</div>
-          <div class="change {{changeClass ga4.changes.sessions}}">
-            {{formatChange ga4.changes.sessions}}
+    <section class="section ga4-section">
+      <div class="ga4-header">
+        <h2 class="ga4-title">Google Analytics 4</h2>
+        <div class="ga4-subtitle">User Acquisition</div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <div class="kpi-label">Sessions</div>
+            <div class="kpi-change {{changeClass ga4.changes.sessions}}">
+              {{formatChange ga4.changes.sessions}}
+            </div>
           </div>
+          <div class="kpi-value">{{formatNumber ga4.current.sessions}}</div>
+          {{#if sparklineCharts.sessions}}
+          <img class="sparkline" src="{{sparklineCharts.sessions}}" alt="Sessions trend" />
+          {{/if}}
         </div>
-        <div class="metric-card">
-          <div class="label">Users</div>
-          <div class="value">{{formatNumber ga4.current.users}}</div>
-          <div class="change {{changeClass ga4.changes.users}}">
-            {{formatChange ga4.changes.users}}
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <div class="kpi-label">Bounce Rate</div>
+            <div class="kpi-change {{changeClass ga4.changes.bounceRate true}}">
+              {{formatChange ga4.changes.bounceRate}}
+            </div>
           </div>
+          <div class="kpi-value">{{formatPercent ga4.current.bounceRate}}</div>
+          {{#if sparklineCharts.bounceRate}}
+          <img class="sparkline" src="{{sparklineCharts.bounceRate}}" alt="Bounce rate trend" />
+          {{/if}}
         </div>
-        <div class="metric-card">
-          <div class="label">Pageviews</div>
-          <div class="value">{{formatNumber ga4.current.pageviews}}</div>
-          <div class="change {{changeClass ga4.changes.pageviews}}">
-            {{formatChange ga4.changes.pageviews}}
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <div class="kpi-label">Page Views</div>
+            <div class="kpi-change {{changeClass ga4.changes.pageviews}}">
+              {{formatChange ga4.changes.pageviews}}
+            </div>
           </div>
+          <div class="kpi-value">{{formatNumber ga4.current.pageviews}}</div>
+          {{#if sparklineCharts.pageviews}}
+          <img class="sparkline" src="{{sparklineCharts.pageviews}}" alt="Page views trend" />
+          {{/if}}
         </div>
-        <div class="metric-card">
-          <div class="label">New Users</div>
-          <div class="value">{{formatNumber ga4.current.newUsers}}</div>
-          <div class="change {{changeClass ga4.changes.newUsers}}">
-            {{formatChange ga4.changes.newUsers}}
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <div class="kpi-label">Average Session Duration</div>
+            <div class="kpi-change {{changeClass ga4.changes.avgSessionDuration}}">
+              {{formatChange ga4.changes.avgSessionDuration}}
+            </div>
           </div>
+          <div class="kpi-value">{{formatDurationHms ga4.current.avgSessionDuration}}</div>
+          {{#if sparklineCharts.avgSessionDuration}}
+          <img class="sparkline" src="{{sparklineCharts.avgSessionDuration}}" alt="Session duration trend" />
+          {{/if}}
         </div>
-        <div class="metric-card">
-          <div class="label">Avg. Session Duration</div>
-          <div class="value">{{formatDuration ga4.current.avgSessionDuration}}</div>
-          <div class="change {{changeClass ga4.changes.avgSessionDuration}}">
-            {{formatChange ga4.changes.avgSessionDuration}}
+      </div>
+
+      <div class="trend-grid">
+        <div class="chart-card">
+          <div class="chart-header">
+            <div class="chart-title">Sessions</div>
+            <div class="chart-value">{{formatNumber ga4.current.sessions}}</div>
           </div>
+          {{#if sessionsTrendChart}}
+          <img class="trend-chart" src="{{sessionsTrendChart}}" alt="Sessions trend" />
+          {{/if}}
         </div>
-        <div class="metric-card">
-          <div class="label">Bounce Rate</div>
-          <div class="value">{{formatPercent ga4.current.bounceRate}}</div>
-          <div class="change {{changeClass ga4.changes.bounceRate true}}">
-            {{formatChange ga4.changes.bounceRate}}
+        <div class="chart-card">
+          <div class="chart-header">
+            <div class="chart-title">Total Users</div>
+            <div class="chart-value">{{formatNumber ga4.current.users}}</div>
+          </div>
+          {{#if usersTrendChart}}
+          <img class="trend-chart" src="{{usersTrendChart}}" alt="Users trend" />
+          {{/if}}
+        </div>
+      </div>
+
+      <div class="mid-grid">
+        <div class="card sessions-by-channel">
+          <div class="card-title">Sessions by Channel</div>
+          {{#if channelsPieChart}}
+          <div class="donut-chart">
+            <img src="{{channelsPieChart}}" alt="Sessions by channel" />
+          </div>
+          {{/if}}
+        </div>
+        <div class="kpi-small-grid">
+          <div class="kpi-card small">
+            <div class="kpi-header">
+              <div class="kpi-label">Active Users</div>
+              <div class="kpi-change {{changeClass ga4.changes.activeUsers}}">
+                {{formatChange ga4.changes.activeUsers}}
+              </div>
+            </div>
+            <div class="kpi-value">{{formatNumber ga4.current.activeUsers}}</div>
+            {{#if sparklineCharts.activeUsers}}
+            <img class="sparkline" src="{{sparklineCharts.activeUsers}}" alt="Active users trend" />
+            {{/if}}
+          </div>
+          <div class="kpi-card small">
+            <div class="kpi-header">
+              <div class="kpi-label">New Users</div>
+              <div class="kpi-change {{changeClass ga4.changes.newUsers}}">
+                {{formatChange ga4.changes.newUsers}}
+              </div>
+            </div>
+            <div class="kpi-value">{{formatNumber ga4.current.newUsers}}</div>
+            {{#if sparklineCharts.newUsers}}
+            <img class="sparkline" src="{{sparklineCharts.newUsers}}" alt="New users trend" />
+            {{/if}}
+          </div>
+          <div class="kpi-card small">
+            <div class="kpi-header">
+              <div class="kpi-label">User Engagement</div>
+              <div class="kpi-change {{changeClass ga4.changes.userEngagementDuration}}">
+                {{formatChange ga4.changes.userEngagementDuration}}
+              </div>
+            </div>
+            <div class="kpi-value">{{formatDurationWords ga4.current.userEngagementDuration}}</div>
+            {{#if sparklineCharts.userEngagementDuration}}
+            <img class="sparkline" src="{{sparklineCharts.userEngagementDuration}}" alt="User engagement trend" />
+            {{/if}}
+          </div>
+          <div class="kpi-card small">
+            <div class="kpi-header">
+              <div class="kpi-label">Engagement Rate</div>
+              <div class="kpi-change {{changeClass ga4.changes.engagementRate}}">
+                {{formatChange ga4.changes.engagementRate}}
+              </div>
+            </div>
+            <div class="kpi-value">{{formatPercent ga4.current.engagementRate}}</div>
+            {{#if sparklineCharts.engagementRate}}
+            <img class="sparkline" src="{{sparklineCharts.engagementRate}}" alt="Engagement rate trend" />
+            {{/if}}
           </div>
         </div>
       </div>
-    </section>
 
-    <!-- Traffic Sources -->
-    <section class="section">
-      <h2 class="section-title">Traffic Sources</h2>
-      {{#if ga4.current.channels.length}}
-      <div class="traffic-sources-content">
-        <div class="table-container">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Channel</th>
-                <th class="number">Sessions</th>
-                <th class="number">Users</th>
-                <th class="percentage">Share</th>
-              </tr>
-            </thead>
-            <tbody>
-              {{#each ga4.current.channels}}
-              <tr>
-                <td>{{name}}</td>
-                <td class="number">{{formatNumber sessions}}</td>
-                <td class="number">{{formatNumber users}}</td>
-                <td class="percentage">{{formatPercent percentage}}</td>
-              </tr>
-              {{/each}}
-            </tbody>
-          </table>
+      <div class="bottom-grid">
+        <div class="card pageviews-card">
+          <div class="card-title">Page Views</div>
+          {{#if pageViewBars.length}}
+          <div class="pageviews-list">
+            {{#each pageViewBars}}
+            <div class="pageview-row">
+              <div class="pageview-path">{{path}}</div>
+              <div class="pageview-bar">
+                <div class="pageview-fill" style="width: {{percent}}%"></div>
+              </div>
+              <div class="pageview-value">{{formatNumber views}}</div>
+            </div>
+            {{/each}}
+          </div>
+          {{else}}
+          <div class="no-data">No page view data available for this period.</div>
+          {{/if}}
         </div>
-        {{#if channelsPieChart}}
-        <div class="chart-container">
-          <img src="{{channelsPieChart}}" alt="Traffic Sources Chart" />
-        </div>
-        {{/if}}
-      </div>
-      {{else}}
-      <div class="no-data">No traffic source data available for this period.</div>
-      {{/if}}
-    </section>
-
-    <!-- Key Events / Conversions -->
-    {{#if ga4.current.keyEvents.length}}
-    <section class="section">
-      <h2 class="section-title">Key Events (Conversions)</h2>
-      <table class="data-table key-events-table">
-        <thead>
-          <tr>
-            <th>Event Name</th>
-            <th class="number">Count</th>
-          </tr>
-        </thead>
-        <tbody>
-          {{#each ga4.current.keyEvents}}
-          <tr>
-            <td class="event-name">{{name}}</td>
-            <td class="event-count number">{{formatNumber count}}</td>
-          </tr>
+        <div class="keyevents-grid">
+          {{#if keyEventDonuts.length}}
+          {{#each keyEventDonuts}}
+          <div class="card keyevent-card">
+            <div class="card-title">{{formatEventLabel name}}</div>
+            <div class="donut-chart">
+              <img src="{{chart}}" alt="{{formatEventLabel name}} breakdown" />
+            </div>
+          </div>
           {{/each}}
-        </tbody>
-      </table>
-    </section>
-    {{/if}}
-
-    <!-- Period Comparison Chart -->
-    {{#if comparisonChart}}
-    <section class="section comparison-section">
-      <h2 class="section-title">Period Comparison</h2>
-      <div class="comparison-chart">
-        <img src="{{comparisonChart}}" alt="Period Comparison Chart" />
+          {{else}}
+          <div class="no-data">No key event data available for this period.</div>
+          {{/if}}
+        </div>
       </div>
     </section>
-    {{/if}}
-
     {{else}}
     <!-- No GA4 Data -->
     <section class="section">

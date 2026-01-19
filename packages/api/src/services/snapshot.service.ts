@@ -31,6 +31,9 @@ export interface SnapshotData {
       pageviews: number;
       avgSessionDuration: number;
       bounceRate: number;
+      activeUsers: number;
+      engagementRate: number;
+      userEngagementDuration: number;
     };
   };
 }
@@ -153,6 +156,12 @@ export async function generateSnapshot(
           previousMetrics.avgSessionDuration
         ),
         bounceRate: calculateChange(currentMetrics.bounceRate, previousMetrics.bounceRate),
+        activeUsers: calculateChange(currentMetrics.activeUsers, previousMetrics.activeUsers),
+        engagementRate: calculateChange(currentMetrics.engagementRate, previousMetrics.engagementRate),
+        userEngagementDuration: calculateChange(
+          currentMetrics.userEngagementDuration,
+          previousMetrics.userEngagementDuration
+        ),
       },
     };
   }

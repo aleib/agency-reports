@@ -7,7 +7,12 @@ import {
 } from "../connectors/google-analytics.connector.js";
 import { getDb } from "../db/database.js";
 import { NotFoundError, ValidationError } from "../lib/errors.js";
-import { loadSnapshotData, loadSnapshotDataFromPath, saveSnapshotData } from "./storage.service.js";
+import {
+  deleteSnapshot as deleteSnapshotStorage,
+  loadSnapshotData,
+  loadSnapshotDataFromPath,
+  saveSnapshotData,
+} from "./storage.service.js";
 
 export interface SnapshotData {
   clientId: string;
@@ -358,4 +363,36 @@ export async function getSnapshot(
     metricsSummary: snapshot.metrics_summary as Record<string, number>,
     createdAt: snapshot.created_at,
   };
+}
+
+/**
+ * Delete snapshot data and record
+ */
+export async function deleteSnapshot(
+  snapshotId: string,
+  userId: string
+): Promise<void> {
+  const db = getDb();
+  const snapshot = await db
+    .selectFrom("snapshots")
+    .innerJoin("clients", "clients.id", "snapshots.client_id")
+    .select([
+      "snapshots.id",
+      "snapshots.client_id",
+      "snapshots.snapshot_date",
+      "snapshots.storage_path",
+      "snapshots.pdf_storage_path",
+    ])
+    .where("snapshots.id", "=", snapshotId)
+    .where("clients.created_by", "=", userId)
+    .executeTakeFirst();
+
+  if (!snapshot) {
+    throw new NotFoundError("Snapshot not found");
+  }
+
+  await db.deleteFrom("snapshots").where("id", "=", snapshotId).execute();
+
+  const snapshotDate = formatSnapshotDate(snapshot.snapshot_date);
+  await deleteSnapshotStorage(snapshot.client_id, snapshotDate);
 }

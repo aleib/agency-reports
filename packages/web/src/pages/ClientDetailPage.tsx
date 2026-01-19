@@ -349,7 +349,12 @@ export function ClientDetailPage() {
           ) : (
             <div className="divide-y divide-gray-200">
               {reportSnapshots.map((snapshot) => (
-                <SnapshotRow key={snapshot.id} snapshot={snapshot} clientId={clientId!} />
+                <SnapshotRow
+                  key={snapshot.id}
+                  snapshot={snapshot}
+                  clientId={clientId!}
+                  onDeleted={loadSnapshots}
+                />
               ))}
             </div>
           )}
@@ -488,9 +493,12 @@ function ReportGenerator({ clientId, hasGA4, onGenerated }: ReportGeneratorProps
 interface SnapshotRowProps {
   snapshot: SnapshotSummary;
   clientId: string;
+  onDeleted: () => void;
 }
 
-function SnapshotRow({ snapshot, clientId }: SnapshotRowProps) {
+function SnapshotRow({ snapshot, clientId, onDeleted }: SnapshotRowProps) {
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [yearStr, monthStr, dayStr] = snapshot.snapshotDate.split("-");
   const year = Number(yearStr);
   const month = Number(monthStr);
@@ -501,33 +509,85 @@ function SnapshotRow({ snapshot, clientId }: SnapshotRowProps) {
     month: "long",
   });
 
+  const handleDeleteSnapshot = async () => {
+    if (isDeleting) return;
+    const shouldDelete = window.confirm(
+      `Delete the ${monthLabel} report? This cannot be undone.`
+    );
+    if (!shouldDelete) return;
+
+    setIsDeleting(true);
+    setDeleteError(null);
+
+    try {
+      await api.deleteSnapshot(snapshot.id);
+      onDeleted();
+    } catch {
+      setDeleteError("Failed to delete report");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
-    <div className="flex items-center justify-between py-4 px-2">
-      <div>
-        <p className="font-medium text-gray-900">{monthLabel}</p>
-        <div className="flex gap-4 text-sm text-gray-600">
-          {snapshot.metricsSummary.sessions && (
-            <span>{snapshot.metricsSummary.sessions.toLocaleString()} sessions</span>
+    <div className="py-4 px-2">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="font-medium text-gray-900">{monthLabel}</p>
+          <div className="flex gap-4 text-sm text-gray-600">
+            {snapshot.metricsSummary.sessions && (
+              <span>{snapshot.metricsSummary.sessions.toLocaleString()} sessions</span>
+            )}
+            {snapshot.metricsSummary.users && (
+              <span>{snapshot.metricsSummary.users.toLocaleString()} users</span>
+            )}
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Link to={`/clients/${clientId}/preview?month=${snapshot.snapshotDate.slice(0, 7)}`}>
+            <Button variant="ghost" size="sm">
+              Preview
+            </Button>
+          </Link>
+          {snapshot.hasPdf && (
+            <a href={api.getPdfDownloadUrl(snapshot.id)} target="_blank" rel="noopener noreferrer">
+              <Button variant="secondary" size="sm">
+                Download PDF
+              </Button>
+            </a>
           )}
-          {snapshot.metricsSummary.users && (
-            <span>{snapshot.metricsSummary.users.toLocaleString()} users</span>
-          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-red-600 hover:text-red-700"
+            onClick={handleDeleteSnapshot}
+            isLoading={isDeleting}
+            aria-label="Delete report"
+          >
+            <svg
+              className="w-4 h-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M3 6h18" />
+              <path d="M8 6v12" />
+              <path d="M16 6v12" />
+              <path d="M5 6l1-2h12l1 2" />
+              <path d="M7 6h10v14H7z" />
+            </svg>
+          </Button>
         </div>
       </div>
-      <div className="flex gap-2">
-        <Link to={`/clients/${clientId}/preview?month=${snapshot.snapshotDate.slice(0, 7)}`}>
-          <Button variant="ghost" size="sm">
-            Preview
-          </Button>
-        </Link>
-        {snapshot.hasPdf && (
-          <a href={api.getPdfDownloadUrl(snapshot.id)} target="_blank" rel="noopener noreferrer">
-            <Button variant="secondary" size="sm">
-              Download PDF
-            </Button>
-          </a>
-        )}
-      </div>
+      {deleteError && (
+        <div className="text-sm text-red-600 mt-2" role="alert">
+          {deleteError}
+        </div>
+      )}
     </div>
   );
 }

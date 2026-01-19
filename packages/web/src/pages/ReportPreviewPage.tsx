@@ -47,6 +47,8 @@ export function ReportPreviewPage() {
       setIsLoading(false);
     }
   };
+  
+  
 
   const [monthYearStr, monthMonthStr] = month.split("-");
   const monthLabelDate = new Date(Number(monthYearStr), Number(monthMonthStr) - 1, 1);

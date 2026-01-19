@@ -183,6 +183,12 @@ class ApiClient {
     });
   }
 
+  async deleteSnapshot(snapshotId: string): Promise<void> {
+    return this.request(`/snapshots/${snapshotId}`, {
+      method: "DELETE",
+    });
+  }
+
   // Report endpoints
   async getReportPreviewUrl(clientId: string, month: string): Promise<string> {
     const token = this.getToken();

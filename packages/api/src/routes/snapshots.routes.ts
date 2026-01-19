@@ -4,6 +4,7 @@ import {
   listSnapshots,
   getSnapshot,
   getSnapshotData,
+  deleteSnapshot,
 } from "../services/snapshot.service.js";
 import { ValidationError } from "../lib/errors.js";
 
@@ -79,5 +80,14 @@ export async function snapshotRoutes(fastify: FastifyInstance) {
   }>("/snapshots/:id/data", async (request) => {
     const data = await getSnapshotData(request.params.id, request.userId);
     return { data };
+  });
+
+  // DELETE /snapshots/:id - Delete snapshot
+  fastify.delete<{
+    Params: { id: string };
+  }>("/snapshots/:id", async (request, reply) => {
+    await deleteSnapshot(request.params.id, request.userId);
+    reply.status(204);
+    return reply.send();
   });
 }
